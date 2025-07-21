@@ -12,7 +12,7 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
+path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
 dir_trial    = "trial_0023_Session4_04";
@@ -25,22 +25,23 @@ idx_bone = 2;
 idx_pin  = 1;
 
 % [EDIT]
-is_displayRegProcess = true;
-is_saveMat = false;
+is_displayRegProcess = false;
+is_saveMat = true;
 
 % [EDIT]
 is_usenavigationdata = true;
 
 % [EDIT] Everything related to PICP
 % path
-path_picp    = "D:\Documents\MATLAB\icp_with_pertubation";
+path_picp    = "D:\DennisChristie\SwarmPerturbation-ICP";
+% parameters
 params_picp.name               = 'tibia';
 params_picp.max_iters          = 30;
 params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 70;
+params_picp.n_candidate        = 128;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -192,12 +193,12 @@ init_boneCTpoints_est    = boneCTpoints_prereg;
 % Initialized the valid timestamps
 timestamp_idcs_valid = all_amode3d_table.Timestamp_idx;
 timestamp_ms_valid   = all_amode3d_table.Timestamp_ms;
-% n_timestamp_valid = length(timestamp_idcs_valid);
+n_timestamp_valid    = length(timestamp_idcs_valid);
 
-% Dummy for debugging purposes only
-n_timestamp_valid = 360;
-timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
-timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
+% % Dummy for debugging purposes only
+% n_timestamp_valid = 360;
+% timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
+% timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
 
 % allocate memory for storing all registration transformation. Later we
 % will put them into one single table
@@ -374,6 +375,7 @@ end
 close(h);
 
 %%
+
 
 % Ts_boneEst_ref_3dmat       = cat(3, Ts_boneEst_ref{:});
 % ts_boneEst_ref             = squeeze(Ts_boneEst_ref_3dmat(1:3, 4, :));
