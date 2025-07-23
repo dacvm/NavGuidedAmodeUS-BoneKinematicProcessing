@@ -22,9 +22,9 @@ csvfile_holderconfig = 'transducerconfig_v8a.csv';
 % [EDIT] Make sure you are using the correct depth data
 % dir_depthdata = 'depthdata_s4_m04_20250714-112513';
 % dir_depthdata = 'depthdata_s3_m02_20250722-114731';     % manual
-% dir_depthdata = 'depthdata_s3_m02_20250722-174503';     % auto 1, tresh 2x normalized noise
+dir_depthdata = 'depthdata_s3_m02_20250722-174503';     % auto 1, tresh 2x normalized noise
 % dir_depthdata = 'depthdata_s3_m02_20250722-174812';     % auto 2, tresh 3x normalized noise
-dir_depthdata = 'depthdata_s3_m02_20250722-180349';     % auto 3, tresh 4x normalized noise
+% dir_depthdata = 'depthdata_s3_m02_20250722-180349';     % auto 3, tresh 4x normalized noise
 
 % [EDIT] Specify folder index
 folder_idx = 1;
@@ -35,7 +35,7 @@ idx_pin  = 1;
 
 % [EDIT]
 is_display = false;
-is_saveMat = true;
+is_saveMat = false;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -201,6 +201,10 @@ h = waitbar(0, 'Please wait...');
 % loop only for valid timestamp
 for idx_t = timestamp_idcs_valid
     %% LOOP FOR TIMESTAMPS
+
+    if(idx_t==1339)
+        a=1;
+    end
 
     % show the waitbar progress
     waitbar(idx_looptime/length(timestamp_idcs_valid), h, sprintf('Timestamp processed: %d/%d', idx_looptime, length(timestamp_idcs_valid)));

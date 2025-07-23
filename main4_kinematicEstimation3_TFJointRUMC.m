@@ -15,24 +15,29 @@ clc; clear; close all;
 path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+% dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT] Change the data you are using accordingly. 
 % ------ dir_depthdata is created by main1_processDepthData.m
 % ------ dir_Tdata is created by main3_registrationWithTime.m
-dir_depthdata = 'depthdata_s4_m04_20250708-172830';
-dir_Tdata     = 'Tdata_s4_m04_20250710-074800';
+% dir_depthdata = 'depthdata_s4_m04_20250708-172830';  % with-navigation
+% dir_Tdata     = 'Tdata_s4_m04_20250710-074800';      % no-kalman 
+% dir_Tdata     = 'Tdata_s4_m04_20250719-180432';      % with-kalman
+
+dir_depthdata = 'depthdata_s3_m02_20250722-114731';    % without-navigation, manual
+dir_Tdata     = 'Tdata_s3_m02_20250723-152902';
 
 % [EDIT] Change this to select the pin [femur, tibia], 1 -> PRO, 2-> DIS
-idcs_pin = [2, 1];
+idcs_pin = [1, 1];
 
 % [EDIT] For displaying [amode3d, tibiaest, femur and tibiagt]
-is_display.amode3d  = false;
-is_display.tibiaest = false;
-is_display.bonegt   = [false, false];
+is_display.amode3d  = true;
+is_display.tibiaest = true;
+is_display.bonegt   = [true, false];
 
 % [EDIT] for saving the resulting mat file
-is_saveMat = true;
+is_saveMat = false;
 
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -82,7 +87,8 @@ run('extra_structCTdata.m');
 % But because it is too long to load, i will use the shortcut (i generated
 % the mat file already, check the snippet code for loading in
 % main_2_process3Damode.m)
-load('all_rigidbodies_table_s4_m04_d01.mat');
+% load('all_rigidbodies_table_s4_m04_d01.mat');
+load('all_rigidbodies_table_s3_m02_d01.mat');
 
 % 3) Load the depth data (all_depthestmean_table and all_deptheststd_table)
 tmp_str = split(dir_trial, '_');
