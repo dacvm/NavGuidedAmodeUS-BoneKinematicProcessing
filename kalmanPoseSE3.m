@@ -53,8 +53,8 @@ if nargin < 5 || isempty(ukf)
 
     % Measurement Noise
     % Rm = blkdiag(5e-4*eye(3),2e-4*eye(4));
-    sigma_pos = 2.0;            % 3 mm
-    sigma_ang = deg2rad(2.0);   % 3 degree
+    sigma_pos = 3.0;            % 3 mm
+    sigma_ang = deg2rad(3.0);   % 3 degree
     Rm = blkdiag(sigma_pos.^2 * eye(3), ...
                  sigma_ang.^2 * eye(4));
 
