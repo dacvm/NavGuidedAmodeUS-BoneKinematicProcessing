@@ -15,10 +15,12 @@ clc; clear; close all;
 path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+% dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT]
-dir_depthdata = 'depthdata_s4_m04_20250708-172830';
+% dir_depthdata = 'depthdata_s4_m04_20250708-172830';
+dir_depthdata = 'depthdata_s3_m02_20250722-114731';
 
 % [EDIT] Select bone and pin
 idx_bone = 2;
@@ -41,7 +43,7 @@ params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 128;
+params_picp.n_candidate        = 64;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -154,7 +156,8 @@ end
 % But because it is too long to load, i will use the shortcut (i generated 
 % the mat file already, check the snippet code for loading in 
 % main_2_process3Damode.m)
-load('all_rigidbodies_table_s4_m04_d01.mat');
+% load('all_rigidbodies_table_s4_m04_d01.mat');
+load('all_rigidbodies_table_s3_m02_d01.mat');
 
 % 2) Load the depth data (all_depthestmean_table and all_deptheststd_table)
 tmp_str = split(dir_trial, '_');
@@ -195,10 +198,10 @@ timestamp_idcs_valid = all_amode3d_table.Timestamp_idx;
 timestamp_ms_valid   = all_amode3d_table.Timestamp_ms;
 n_timestamp_valid    = length(timestamp_idcs_valid);
 
-% % Dummy for debugging purposes only
-% n_timestamp_valid = 360;
-% timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
-% timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
+% Dummy for debugging purposes only
+n_timestamp_valid = 1200;
+timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
+timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
 
 % allocate memory for storing all registration transformation. Later we
 % will put them into one single table
