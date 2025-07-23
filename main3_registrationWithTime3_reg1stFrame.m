@@ -154,7 +154,7 @@ end
 % But because it is too long to load, i will use the shortcut (i generated 
 % the mat file already, check the snippet code for loading in 
 % main_2_process3Damode.m)
-load('all_rigidbodies_table.mat');
+load('all_rigidbodies_table_s4_m04_d01.mat');
 
 % 2) Load the depth data (all_depthestmean_table and all_deptheststd_table)
 tmp_str = split(dir_trial, '_');
