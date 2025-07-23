@@ -1,16 +1,20 @@
 %% 2) LOAD THE PREREGISTRATION AREA
 
-if(is_usenavigationdata)
-    % [edit] specify your preregistration area for data with navigation
-    % (processed by GUI-based preregistration area selection script)
-    file_femurPrereg = "areasphere_femur_02-18-2025_22-14_withnav.mat";
-    file_tibiaPrereg = "areasphere_tibia_02-18-2025_22-18_withnav.mat";
-else
-    % [edit] specify your preregistration area for data without navigation
-    % (processed by GUI-based preregistration area selection script)
-    file_femurPrereg = "areasphere_femur_03-17-2025_10-40_withoutnav.mat";
-    file_tibiaPrereg = "areasphere_tibia_03-17-2025_11-49_withoutnav.mat";
-end
+% if(is_usenavigationdata)
+%     % [edit] specify your preregistration area for data with navigation
+%     % (processed by GUI-based preregistration area selection script)
+%     file_femurPrereg = "areasphere_femur_02-18-2025_22-14_withnav.mat";
+%     file_tibiaPrereg = "areasphere_tibia_02-18-2025_22-18_withnav.mat";
+% else
+%     % [edit] specify your preregistration area for data without navigation
+%     % (processed by GUI-based preregistration area selection script)
+%     file_femurPrereg = "areasphere_femur_03-17-2025_10-40_withoutnav.mat";
+%     file_tibiaPrereg = "areasphere_tibia_03-17-2025_11-49_withoutnav.mat";
+% end
+
+file_femurPrereg = "areasphere_femur_02-18-2025_22-14.mat";
+% file_tibiaPrereg = "areasphere_tibia_02-18-2025_22-18.mat";
+file_tibiaPrereg = "areasphere_tibia_07-23-2025_17-59.mat";
 
 % load femur
 load(fullfile(fullfile(path_bonestl, "prereg", file_femurPrereg)));

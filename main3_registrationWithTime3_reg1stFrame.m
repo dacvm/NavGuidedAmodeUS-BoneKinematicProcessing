@@ -20,7 +20,8 @@ dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT]
 % dir_depthdata = 'depthdata_s4_m04_20250708-172830';
-dir_depthdata = 'depthdata_s3_m02_20250722-114731';
+% dir_depthdata = 'depthdata_s3_m02_20250722-114731';
+dir_depthdata = 'depthdata_s3_m02_20250722-174503';
 
 % [EDIT] Select bone and pin
 idx_bone = 2;
@@ -31,19 +32,19 @@ is_displayRegProcess = false;
 is_saveMat = true;
 
 % [EDIT]
-is_usenavigationdata = true;
+% is_usenavigationdata = true;
 
 % [EDIT] Everything related to PICP
 % path
 path_picp    = "D:\DennisChristie\SwarmPerturbation-ICP";
 % parameters
 params_picp.name               = 'tibia';
-params_picp.max_iters          = 30;
+params_picp.max_iters          = 10;
 params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 64;
+params_picp.n_candidate        = 16;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -199,7 +200,7 @@ timestamp_ms_valid   = all_amode3d_table.Timestamp_ms;
 n_timestamp_valid    = length(timestamp_idcs_valid);
 
 % Dummy for debugging purposes only
-n_timestamp_valid = 1200;
+n_timestamp_valid = 1310;
 timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
 timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
 
@@ -275,11 +276,16 @@ for idx_t_3damode = 1:n_timestamp_valid
         kalmanposese3.t           = timestamp_ms_valid(idx_t_3damode-3:idx_t_3damode-1);
         kalmanposese3.T_meas_i    = T_icpnow_icpinit;
         kalmanposese3.t_i         = timestamp_ms_valid(idx_t_3damode);
-        [T_icpnow_icpinit, ukf] = kalmanPoseSE3(kalmanposese3.Ts_est, ...
-                                                kalmanposese3.t, ...
-                                                kalmanposese3.T_meas_i, ...
-                                                kalmanposese3.t_i, ...
-                                                ukf);
+
+        if(idx_t_3damode == 895)
+            a=1;
+        end
+
+        [T_icpnow_icpinit, ukf] = kalmanPoseSE3_v2(kalmanposese3.Ts_est, ...
+                                                   kalmanposese3.t, ...
+                                                   kalmanposese3.T_meas_i, ...
+                                                   kalmanposese3.t_i, ...
+                                                   ukf);
     end
 
     % Transform the bone
@@ -372,7 +378,6 @@ for idx_t_3damode = 1:n_timestamp_valid
     fprintf('(%.2fs)\n', time);
 
 end
-
 
 % Close the waitbar
 close(h);
