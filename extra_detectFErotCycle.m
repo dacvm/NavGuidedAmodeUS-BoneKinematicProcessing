@@ -6,7 +6,10 @@ clc; clear; close all;
 path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
+
+% [EDIT] Specify folder index
+folder_idx = 1;
 
 % [EDIT] Select bone and pin
 idx_bone = 2;
@@ -30,6 +33,18 @@ path_bonestl  = fullfile(path_root, "data", "ct", "bone");
 
 % Generate path to function directory
 addpath(genpath(path_function));
+
+% 2) Get all the folders of the intermediates
+items_dir = dir(path_intermediate);
+folders_intermediate = {items_dir([items_dir.isdir] & ~ismember({items_dir.name}, {'.', '..'})).name};
+
+% 3) Get all the folders of the measurements
+items_dir = dir(path_measurement);
+folders_measurement = {items_dir([items_dir.isdir] & ~ismember({items_dir.name}, {'.', '..'})).name};
+% the last folder for measurements is always empty (it was like that from
+% the navigation system) we don't need that.
+folders_measurement(end) = [];
+
 
 %% INITIALIZE SOME RIGID BODY METADATA
 
@@ -85,7 +100,7 @@ ref_name   = 'B_N_REF';
 % But because it is too long to load, i will use the shortcut (i generated
 % the mat file already, check the snippet code for loading in
 % main_2_process3Damode.m)
-load('all_rigidbodies_table.mat');
+load('all_rigidbodies_table_s3_m02_d01.mat');
 
 
 
@@ -192,13 +207,13 @@ valley_x = locs;          % x–coordinates of each valley
 valley_y = -pksNeg;       % corresponding y–values
 plot(ax2, valley_x, valley_y, 'or', 'MarkerFaceColor', 'r');
 
-% % Write the value to a csv file   
-% tmp_str = split(dir_trial, '_');
-% sess_str = tmp_str{3};
-% meas_str = tmp_str{4};
-% csv_filename = sprintf('cycle_timestamp_s%s_m%s.csv', sess_str(end), meas_str);
-% csv_fullpath = fullfile(path_outputs, csv_filename);
-% writematrix(valley_x, csv_fullpath);
+% Write the value to a csv file   
+tmp_str = split(dir_trial, '_');
+sess_str = tmp_str{3};
+meas_str = tmp_str{4};
+csv_filename = sprintf('cycle_timestamp_s%s_m%s.csv', sess_str(end), meas_str);
+csv_fullpath = fullfile(path_outputs, csv_filename);
+writematrix(valley_x, csv_fullpath);
 
 
 

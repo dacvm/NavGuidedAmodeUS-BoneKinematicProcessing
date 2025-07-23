@@ -27,12 +27,12 @@ dir_Tdata     = 'Tdata_s4_m04_20250710-074800';
 idcs_pin = [2, 1];
 
 % [EDIT] For displaying [amode3d, tibiaest, femur and tibiagt]
-is_display.amode3d  = true;
-is_display.tibiaest = true;
-is_display.bonegt   = [true, true];
+is_display.amode3d  = false;
+is_display.tibiaest = false;
+is_display.bonegt   = [false, false];
 
 % [EDIT] for saving the resulting mat file
-is_saveMat = false;
+is_saveMat = true;
 
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -82,7 +82,7 @@ run('extra_structCTdata.m');
 % But because it is too long to load, i will use the shortcut (i generated
 % the mat file already, check the snippet code for loading in
 % main_2_process3Damode.m)
-load('all_rigidbodies_table.mat');
+load('all_rigidbodies_table_s4_m04_d01.mat');
 
 % 3) Load the depth data (all_depthestmean_table and all_deptheststd_table)
 tmp_str = split(dir_trial, '_');
@@ -249,18 +249,18 @@ for idx_t_3damode = 1:n_timestamp_valid
     % 3) CALCULATE JOINT KINEMATICS (EST AND GT) --------------------------
 
     % 1) Calculate the knee joint 6Dof values (gt and est)
-    % % % The function below is mine, i am not sure that it is correct or not
+    % % The function below is mine, i am not sure that it is correct or not
     [T_est, r_est, t_est] = generateKneeJointCS_v2(Ts_femurGT_ref{idx_t_3damode}, T_boneEst_ref, 'r');
     [T_gt, r_gt, t_gt]    = generateKneeJointCS_v2(Ts_femurGT_ref{idx_t_3damode}, Ts_tibiaGT_ref{idx_t_3damode}, 'r');
     r_est = rad2deg(r_est);
     r_gt = rad2deg(r_gt);
 
-    % % The function below, i got from Miriam (ORL, RadboudUMC). They usually
-    % % construct the R matrix by stacking the basis vector of the ACS
-    % % row-wise (which is actually not standard, it should be column-wise).
-    % % Consequently the function below also requires the similar structure. 
-    % % Since i use the column-wise R, before i feed to this function i need
-    % % to transpose it first.
+    % The function below, i got from Miriam (ORL, RadboudUMC). They usually
+    % construct the R matrix by stacking the basis vector of the ACS
+    % row-wise (which is actually not standard, it should be column-wise).
+    % Consequently the function below also requires the similar structure. 
+    % Since i use the column-wise R, before i feed to this function i need
+    % to transpose it first.
     % T_femurGT_ref = Ts_femurGT_ref{idx_t_3damode};
     % r_est = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_boneEst_ref(1:3, 1:3)', 'right');
     % % This one, i have no clue why this operation, but i just following

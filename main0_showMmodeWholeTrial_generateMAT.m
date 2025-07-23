@@ -11,7 +11,7 @@ path_data     = fullfile(path_root, 'data');
 addpath(genpath(path_function));
 
 % [edit] directory to the trial
-dir_trial    = "trial_0021_Session4_03";
+dir_trial    = "trial_0011_Session3_02";
 
 % declare again some of the important paths
 path_bonescan     = fullfile(path_data, dir_trial, 'bonescan');
@@ -66,6 +66,6 @@ for folder_idx = 1:length(folders_measurement)
 
     % save the data
     filename = sprintf('ust_data_%s.mat',  folders_intermediate{folder_idx});
-    save(fullfile(path_data, filename), 'ust_data', '-v7.3');
+    save(fullfile(path_data, dir_trial, filename), 'ust_data', '-v7.3');
 
 end

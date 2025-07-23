@@ -41,8 +41,9 @@ function [f, data_cleaned, cluster_idx, figure1] = estimateBoneCluster_v3(peaks,
 % f                       A spline interpolation matlab object. To get the
 %                         data from this object, use feval(f, X) function.
 %
-% data_cleaned            A Mx2 matrix, first column is timestamp, second
-%                         column is the depth, each rows is observation. 
+% data_cleaned            A Mx3 matrix, first column is timestamp, second
+%                         column is the depth, each rows is observation,
+%                         third column is the amplitude value.
 %                         Cleaned data from outliers, the data that is used
 %                         for curve fitting. You can use this data to plot
 %                         to the M-mode space image.

@@ -9,16 +9,22 @@ clc; clear; close all;
 path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+% dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT] window configuration file
 % csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-04-10_15-53-56.csv';
+% csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-19_11-29-46_edited2025-07-22_10-31-50.csv';
 
 % [EDIT] holder configuration file
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
 
 % [EDIT] Make sure you are using the correct depth data
-dir_depthdata = 'depthdata_s4_m04_20250714-112513';
+% dir_depthdata = 'depthdata_s4_m04_20250714-112513';
+% dir_depthdata = 'depthdata_s3_m02_20250722-114731';     % manual
+% dir_depthdata = 'depthdata_s3_m02_20250722-174503';     % auto 1, tresh 2x normalized noise
+% dir_depthdata = 'depthdata_s3_m02_20250722-174812';     % auto 2, tresh 3x normalized noise
+dir_depthdata = 'depthdata_s3_m02_20250722-180349';     % auto 3, tresh 4x normalized noise
 
 % [EDIT] Specify folder index
 folder_idx = 1;
@@ -149,7 +155,7 @@ end
 % 2) But because it is too long to load, i will use the shortcut (i generated
 % the mat file already, check the snippet code for loading in
 % main_2_process3Damode.m)
-load('all_rigidbodies_table.mat');
+load('all_rigidbodies_table_s3_m02_d01.mat');
 
 % Load the depth data (all_depthestmean_table and all_deptheststd_table)
 tmp_str = split(dir_trial, '_');
@@ -239,7 +245,7 @@ for idx_t = timestamp_idcs_valid
     if(is_display)
         display_axis(ax1, T_pin_ref(1:3, 4), T_pin_ref(1:3, 1:3), 30, 'T_pin_ref', 'Tag', 'cs_bonepin');
         display_axis(ax1, T_boneGT_ref(1:3, 4), T_boneGT_ref(1:3, 1:3), 30, 'T_boneGT_ref', 'Tag', 'cs_bonegt');
-        % trisurf(boneCTtri_GT, 'FaceColor', '#bdc3c7', 'FaceAlpha', 0.15, 'EdgeColor', 'k', 'EdgeAlpha', 0.1, 'Tag', 'bonesurface_ct');
+        trisurf(boneCTtri_GT, 'FaceColor', '#bdc3c7', 'FaceAlpha', 0.15, 'EdgeColor', 'k', 'EdgeAlpha', 0.1, 'Tag', 'bonesurface_ct');
     end
 
     % Preparing vars

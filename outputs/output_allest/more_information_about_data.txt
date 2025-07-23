@@ -1,0 +1,6 @@
+Tuesday, 22-06-205
+- Added depthdata_s3_m02
+-- 20250722-114731 (manual selection by user) 
+-- 20250722-174503 (auto, thresh 2x noise)
+-- 20250722-174812 (auto, thresh 3x noise) 
+-- 20250722-180349 (auto, thresh 4x noise)

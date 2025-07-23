@@ -60,10 +60,12 @@ function [peak_threshold, prom_threshold] = adaptiveThreshInit(mmmode, init_dept
 
 
     % Initialize peak threshold to 70% of that maximum
-    peak_threshold = 0.7 * signalclipped_max;
+    % peak_threshold = 0.7 * signalclipped_max;
+    peak_threshold = 0.75 * signalclipped_max;
 
     % Set prominence threshold to 30% of the peak threshold
-    prom_threshold = 0.3 * peak_threshold;
+    % prom_threshold = 0.3 * peak_threshold;
+    prom_threshold = 0.4 * peak_threshold;
 
 
     % Check the threshold if it falls below noise level

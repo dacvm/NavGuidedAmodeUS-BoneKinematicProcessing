@@ -9,10 +9,10 @@ clc; clear; close all;
 path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT] window configuration file
-csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-07-03_15-43-26.csv';
+csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-19_11-29-46_edited2025-07-22_10-31-50';
 
 % [EDIT] holder configuration file
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
@@ -110,8 +110,15 @@ end
 ust_dataspec.n_ust    = length(ust_windowconfig);
 ust_dataspec.n_sample = 3500;
 
-% select probes that has window defined
-ust_config_selected = ust_windowconfig([ust_windowconfig.IsSet] == 1);
+% Select probes that has window defined
+% % The block below is the ideal one, selecting the ust based on the field
+% % called .IsSet, which defined true/false when we do the experiment.
+% ust_config_selected = ust_windowconfig([ust_windowconfig.IsSet] == 1);
+% n_ust_selected      = length(ust_config_selected);
+% But i will use this block, because in Session 3 (without navigation) we
+% use full femur and tibia while in Session 4 (with navigation) we only use
+% tibia. Devils in the detail, but we decided to only use tibia
+ust_config_selected = ust_windowconfig(14:26);
 n_ust_selected      = length(ust_config_selected);
 
 % declare the ultrasound spesification
@@ -184,6 +191,7 @@ end
 % from all ultrasound transducer
 ust_depthest_matrix = zeros(n_timestamp, n_ust_selected);
 ust_depthstd_matrix = zeros(n_timestamp, n_ust_selected);
+ust_depthamp_matrix = zeros(n_timestamp, n_ust_selected);
 
 % variable to store all the ust number (index) we used
 ust_numbers = zeros(1, n_ust_selected);
@@ -263,16 +271,15 @@ for ust_idx=1:n_ust_selected
     end
 
 
+
     % [6] -----------------------------------------------------------------
     % Initialize adaptive threshold for peak detection
     init_depth_mm    = ust_datapacket.init;
     init_depth_idx   = round(init_depth_mm/ust_usspec.ds);
-    init_window_mm   = 1.5;
+    init_window_mm   = m - lb;
     init_window_idx  = round(init_window_mm / ust_usspec.ds);
     [peak_threshold, prom_threshold] = adaptiveThreshInit(ust_datapacket.mmode_proc, init_depth_idx, init_window_idx, false);
     
-
-
 
     % [7] -----------------------------------------------------------------
     % Setting up all the required parameter for depth detection
@@ -288,17 +295,32 @@ for ust_idx=1:n_ust_selected
     peakparam.prom_threhsold = prom_threshold;
 
     % moving window parameters
-    movwinparam.length_window = 500;
-    movwinparam.length_stride = 100;
+    movwinparam.length_window = 400;
+    movwinparam.length_stride = 150;
 
     % bone cluster parameters
-    clusterparam.epsilon    = 0.16;
-    clusterparam.minpts     = 35;
-    % clusterparam.cov        = [300 0; 0 1.5]; % before ust25 incident
+    % % set of parameters, option 1
+    % clusterparam.epsilon    = 0.2;
+    % clusterparam.minpts     = 50;
+    % clusterparam.cov        = [300 0; 0 3.0];
+    % outlierparam.gradthresh = 1.8;
+    % outlierparam.minpoint   = 10;
+    % smoothingparam          = 0.0001;
+    % % set of parameters, option 2
+    % clusterparam.epsilon    = 0.8;
+    % clusterparam.minpts     = 35;
+    % clusterparam.cov        = [300 0; 0 1.5];
+    % outlierparam.gradthresh = 3;
+    % outlierparam.minpoint   = 10;
+    % smoothingparam          = 0.0001;
+    % set of parameters, option 3
+    clusterparam.epsilon    = 0.6;
+    clusterparam.minpts     = 100;
     clusterparam.cov        = [300 0; 0 1.5];
-    outlierparam.gradthresh = 3;
-    outlierparam.minpoint   = 10;
+    outlierparam.gradthresh = 2.25;
+    outlierparam.minpoint   = 20;
     smoothingparam          = 0.0001;
+
 
     % detect the bone from mmode image
     estimatedbone_proc = mmodeDepthDetection_v2( ust_datapacket.mmode_proc, depth_unit, seed, peakparam, ...
@@ -332,8 +354,10 @@ for ust_idx=1:n_ust_selected
     ust_depthstd_matrix(ust_depthest.timestamp, ust_idx) = ust_depthest.std;
     ust_depthamp_matrix(ust_depthest.timestamp, ust_idx) = ust_depthest.amp;
 
+
 % end of ust_idx loop    
 end
+
 
 % initialize a table
 ust_cell     = arrayfun(@num2str, ust_numbers, 'UniformOutput', false);
