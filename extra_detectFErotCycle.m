@@ -207,13 +207,13 @@ valley_x = locs;          % x–coordinates of each valley
 valley_y = -pksNeg;       % corresponding y–values
 plot(ax2, valley_x, valley_y, 'or', 'MarkerFaceColor', 'r');
 
-% Write the value to a csv file   
-tmp_str = split(dir_trial, '_');
-sess_str = tmp_str{3};
-meas_str = tmp_str{4};
-csv_filename = sprintf('cycle_timestamp_s%s_m%s.csv', sess_str(end), meas_str);
-csv_fullpath = fullfile(path_outputs, csv_filename);
-writematrix(valley_x, csv_fullpath);
+% % Write the value to a csv file   
+% tmp_str = split(dir_trial, '_');
+% sess_str = tmp_str{3};
+% meas_str = tmp_str{4};
+% csv_filename = sprintf('cycle_timestamp_s%s_m%s.csv', sess_str(end), meas_str);
+% csv_fullpath = fullfile(path_outputs, csv_filename);
+% writematrix(valley_x, csv_fullpath);
 
 
 

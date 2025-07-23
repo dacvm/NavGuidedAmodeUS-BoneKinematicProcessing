@@ -9,7 +9,7 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
+path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
 dir_trial    = "trial_0023_Session4_04";
@@ -18,14 +18,15 @@ dir_trial    = "trial_0023_Session4_04";
 % -----> dir_depthdata is created by main1_processDepthData.m
 % -----> dir_Tdata is created by main3_registrationWithTime.m
 dir_depthdata = 'depthdata_s4_m04_20250708-172830';
-dir_Tdata     = 'Tdata_s4_m04_20250710-074800';
-% dir_Tdata     = 'Tdata_s4_m04_20250717-154844';
+% dir_Tdata     = 'Tdata_s4_m04_20250710-074800';
+% dir_Tdata     = 'Tdata_s4_m04_20250719-180432';
+dir_Tdata     = 'Tdata_s4_m04_20250723-102357';
 
 % [EDIT] for saving the resulting mat file
 is_saveMat = false;
 
 % [EDIT]
-is_split  = false;
+is_split  = true;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -76,6 +77,12 @@ c =  [116, 185, 255;
 
 % Title for each plot, can be used in any figure
 ax_title = {'Medial-Lateral', 'Anterior-Posterior', 'Distraction-Compression', 'Flexion-Extension', 'Abduction-Adduction', 'External-Internal'};
+ax_ylim  = [ -5,  15; 
+            -15,   0; 
+             15,  30; 
+            -70,  10; 
+            -15,   5;
+            -25,  -5];
 
 % First figure is to show the joint kinematic with all of the cycle parts
 fig1 = figure('Name', 'Joint Kinematic: All Cycle Parts');
@@ -100,6 +107,7 @@ for idx_dof = 1:6
         ylabel(ax1(idx_dof), 'deg');
     end
     ax1(idx_dof).FontSize = 12;
+    ylim( ax1(idx_dof), ax_ylim(idx_dof,:) );
 end
 
 
@@ -144,7 +152,7 @@ timestamp_ms_valid = all_kneeJoint6DOFs_table.Timestamp_ms;
 kneeJoint6DOFs_est = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_est);
 kneeJoint6DOFs_gt  = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_gt);
 
-cycle_select     = [2,5];
+cycle_select     = [1,5];
 cycle_idx_select = [cycle_timestamp(cycle_select(1)), cycle_timestamp(cycle_select(2))];
 
 for idx_dof=1:6
@@ -169,7 +177,7 @@ for idx_dof=1:6
     result_std   = std(currentDoF_kneeJoint_estgt_diff);
     [~, ~, ~, result_q2, ~, result_uw, ~] = computeBoxplotStats(abs(currentDoF_kneeJoint_estgt_diff));
 
-    str = sprintf('corr   = %.2f\nrmse = %.2f � %.2f\nmad  = %.2f%s%.2f', result_corr, result_rmse, result_std, result_q2, char(9652), result_uw);
+    str = sprintf('corr   = %.2f\nrmse = %.2f, %.2f\nmad  = %.2f%s%.2f', result_corr, result_rmse, result_std, result_q2, char(9652), result_uw);
     text( ax1(idx_dof), ...
           0.05, 0.95, ... 
           str, ...
@@ -180,7 +188,7 @@ for idx_dof=1:6
           'EdgeColor',        'k', ...
           'Margin',           5 );
 
-    str = sprintf('rmse = %.2f � %.2f\nmad  = %.2f%s%.2f', result_rmse, result_std, result_q2, char(9652), result_uw);
+    str = sprintf('rmse = %.2f, %.2f\nmad  = %.2f%s%.2f', result_rmse, result_std, result_q2, char(9652), result_uw);
     text( ax2(idx_dof), ...
           0.05, 0.95, ... 
           str, ...
@@ -208,7 +216,7 @@ kneeJoint6DOFs_est = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_est);
 kneeJoint6DOFs_gt  = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_gt);
 
 % Select cycle
-cycle_select      = [2,5];
+cycle_select      = [1,6];
 cycle_idcs_select = cycle_timestamp(cycle_select(1):cycle_select(2));
 
 for idx_dof=1:6
@@ -276,8 +284,8 @@ for idx_dof=1:6
         currentDoF_kneeJoint_gt_cyclepartsnew(:,i)  = currentDoF_cyclepart_gt_valuesstretched;
 
         % plot the stretched version
-        plot(ax1(idx_dof), currentDoF_cyclepart_est_valuesstretched, '-', 'Color', '#FFCDD2', 'LineWidth', 0.5);
-        plot(ax1(idx_dof), currentDoF_cyclepart_gt_valuesstretched, '-', 'Color', '#BBDEFB', 'LineWidth', 0.5);
+        % plot(ax1(idx_dof), currentDoF_cyclepart_est_valuesstretched, '-', 'Color', '#FFEBEE', 'LineWidth', 0.5);
+        % plot(ax1(idx_dof), currentDoF_cyclepart_gt_valuesstretched, '-', 'Color', '#E3F2FD', 'LineWidth', 0.5);
     end
 
     % calculate mean and std for the estimation...
@@ -290,10 +298,10 @@ for idx_dof=1:6
     currentDoF_kneeJoint_estgt_diff   = currentDoF_kneeJoint_est_cyclemean - currentDoF_kneeJoint_gt_cyclemean;
 
     % plot the mean and std
-    % display_shadedError(ax1(idx_dof), 1:max_length, current_kneeJointDOF_est_cyclemean, current_kneeJointDOF_est_cyclestd, 'colors', [1 0 0]);
-    % display_shadedError(ax1(idx_dof), 1:max_length, current_kneeJointDOF_gt_cyclemean, current_kneeJointDOF_gt_cyclestd, 'colors', [0 0 1]);
-    plot(ax1(idx_dof), currentDoF_kneeJoint_est_cyclemean, '-', 'Color', 'r', 'LineWidth', 2);
-    plot(ax1(idx_dof), currentDoF_kneeJoint_gt_cyclemean, '-', 'Color', 'b', 'LineWidth', 2);
+    display_shadedError(ax1(idx_dof), 1:max_length, currentDoF_kneeJoint_est_cyclemean, currentDoF_kneeJoint_est_cyclestd, 'colors', [1 0 0]);
+    display_shadedError(ax1(idx_dof), 1:max_length, currentDoF_kneeJoint_gt_cyclemean, currentDoF_kneeJoint_gt_cyclestd, 'colors', [0 0 1]);
+    % plot(ax1(idx_dof), currentDoF_kneeJoint_est_cyclemean, '-', 'Color', 'r', 'LineWidth', 2);
+    % plot(ax1(idx_dof), currentDoF_kneeJoint_gt_cyclemean, '-', 'Color', 'b', 'LineWidth', 2);
     % set the legend, but i only want the last two (stored with newest first)
     mylines = findobj(ax1(idx_dof), 'Type','Line');
     legend(mylines(1:2), {'Ground truth','Estimation'}, 'FontSize', 12);
@@ -311,7 +319,7 @@ for idx_dof=1:6
     result_std   = std(currentDoF_kneeJoint_estgt_diff);
     [~, ~, ~, result_q2, ~, result_uw, ~] = computeBoxplotStats(abs(currentDoF_kneeJoint_estgt_diff));
 
-    str = sprintf('corr   = %.2f\nrmse = %.2f � %.2f\nmad  = %.2f%s%.2f', result_corr, result_rmse, result_std, result_q2, char(9652), result_uw);
+    str = sprintf('corr   = %.2f\nrmse = %.2f, %.2f\nmad  = %.2f%s%.2f', result_corr, result_rmse, result_std, result_q2, char(9652), result_uw);
     text( ax1(idx_dof), ...
           0.05, 0.95, ... 
           str, ...
@@ -322,7 +330,7 @@ for idx_dof=1:6
           'EdgeColor',        'k', ...
           'Margin',           5 );
 
-    str = sprintf('rmse = %.2f � %.2f\nmad  = %.2f%s%.2f', result_rmse, result_std, result_q2, char(9652), result_uw);
+    str = sprintf('rmse = %.2f, %.2f\nmad  = %.2f%s%.2f', result_rmse, result_std, result_q2, char(9652), result_uw);
     text( ax2(idx_dof), ...
           0.05, 0.95, ... 
           str, ...
