@@ -13,8 +13,8 @@
 % end
 
 file_femurPrereg = "areasphere_femur_02-18-2025_22-14.mat";
-% file_tibiaPrereg = "areasphere_tibia_02-18-2025_22-18.mat";
-file_tibiaPrereg = "areasphere_tibia_07-23-2025_17-59.mat";
+file_tibiaPrereg = "areasphere_tibia_02-18-2025_22-18.mat";
+% file_tibiaPrereg = "areasphere_tibia_07-23-2025_17-59.mat";
 
 % load femur
 load(fullfile(fullfile(path_bonestl, "prereg", file_femurPrereg)));

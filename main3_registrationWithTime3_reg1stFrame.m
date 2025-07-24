@@ -15,13 +15,13 @@ clc; clear; close all;
 path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
-% dir_trial    = "trial_0023_Session4_04";
-dir_trial    = "trial_0011_Session3_02";
+dir_trial    = "trial_0023_Session4_04";
+% dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT]
-% dir_depthdata = 'depthdata_s4_m04_20250708-172830';
-% dir_depthdata = 'depthdata_s3_m02_20250722-114731';
-dir_depthdata = 'depthdata_s3_m02_20250722-174503';
+dir_depthdata = 'depthdata_s4_m04_20250708-172830';      % with-nav
+% dir_depthdata = 'depthdata_s3_m02_20250722-114731';      % no-nav, manual
+% dir_depthdata = 'depthdata_s3_m02_20250722-174503';      % no-nav, auto, 2x noise
 
 % [EDIT] Select bone and pin
 idx_bone = 2;
@@ -29,7 +29,7 @@ idx_pin  = 1;
 
 % [EDIT]
 is_displayRegProcess = false;
-is_saveMat = true;
+is_saveMat = false;
 
 % [EDIT]
 % is_usenavigationdata = true;
@@ -39,12 +39,12 @@ is_saveMat = true;
 path_picp    = "D:\DennisChristie\SwarmPerturbation-ICP";
 % parameters
 params_picp.name               = 'tibia';
-params_picp.max_iters          = 10;
+params_picp.max_iters          = 20;
 params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 16;
+params_picp.n_candidate        = 64;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -157,8 +157,8 @@ end
 % But because it is too long to load, i will use the shortcut (i generated 
 % the mat file already, check the snippet code for loading in 
 % main_2_process3Damode.m)
-% load('all_rigidbodies_table_s4_m04_d01.mat');
-load('all_rigidbodies_table_s3_m02_d01.mat');
+load('all_rigidbodies_table_s4_m04_d01.mat');
+% load('all_rigidbodies_table_s3_m02_d01.mat');
 
 % 2) Load the depth data (all_depthestmean_table and all_deptheststd_table)
 tmp_str = split(dir_trial, '_');
@@ -200,7 +200,7 @@ timestamp_ms_valid   = all_amode3d_table.Timestamp_ms;
 n_timestamp_valid    = length(timestamp_idcs_valid);
 
 % Dummy for debugging purposes only
-n_timestamp_valid = 1310;
+n_timestamp_valid = 1160;
 timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
 timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
 
@@ -208,19 +208,18 @@ timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
 % will put them into one single table
 Ts_icpnow_icpprev   = cell(n_timestamp_valid,1);
 Ts_icpnow_icpinit   = cell(n_timestamp_valid,1);
-Ts_icpnowKF_icpinit = cell(n_timestamp_valid,1);
 Ts_boneEst_ref      = cell(n_timestamp_valid,1);
-Ts_boneEstKF_ref    = cell(n_timestamp_valid,1);
 Ts_boneGT_ref       = cell(n_timestamp_valid,1);
 errors_T                   = cell(n_timestamp_valid, 1);
 errors_rmse_us2regbone     = zeros(n_timestamp_valid, 1);
 errors_rmse_regbone2gtbone = zeros(n_timestamp_valid, 1);
+is_invalid                 = zeros(n_timestamp_valid, 1);
+
+% initialization for ukf object
+ukf  = [];
 
 % initialize waitbar, so the user not get bored
 h = waitbar(0, 'Please wait...');
-
-% test
-ukf  = [];
 
 % loop for all timeframe
 for idx_t_3damode = 1:n_timestamp_valid
@@ -246,6 +245,28 @@ for idx_t_3damode = 1:n_timestamp_valid
     % 1.1) Get the initial data for preregistration purposes
     current_boneQUSpoints = all_amode3d_table{idx_t_3damode, 'Points'};
     current_boneQUSpoints = current_boneQUSpoints{1};
+
+    % 1.1a) If there is NaN, skip. This NaN can exist because there are 
+    % some frames where the mocap system can't track some rigid bodies.
+    % Note. This skipping process is acceptable if there are only few 
+    % (1-3) consecutive frames of NaN values. Too many will cause the
+    % registration step to be unstable
+    if(any(isnan(current_boneQUSpoints(:))))
+
+        % If a NaN found, put every value to its default value
+        fprintf('There is NaN in current_boneQUSpoints. Skipped.\n');
+        Ts_icpnow_icpprev{idx_t_3damode}          = eye(4);
+        Ts_icpnow_icpinit{idx_t_3damode}          = eye(4);
+        Ts_boneEst_ref{idx_t_3damode}             = eye(4);
+        Ts_boneGT_ref{idx_t_3damode}              = eye(4);
+        errors_T{idx_t_3damode}                   = zeros(1, 6);
+        errors_rmse_us2regbone(idx_t_3damode)     = 0;
+        errors_rmse_regbone2gtbone(idx_t_3damode) = 0;
+        is_invalid(idx_t_3damode)                 = 1;
+
+        % ignore the rest of the loop, continue to next index
+        continue;
+    end
 
     % 1.2) Register with icp(moving, fixed)
     [T_currentBoneQUS_currentBoneCT, ~] = icp_with_perturbation_v2( current_boneCTpoints_est, current_boneQUSpoints, ...
@@ -277,10 +298,6 @@ for idx_t_3damode = 1:n_timestamp_valid
         kalmanposese3.T_meas_i    = T_icpnow_icpinit;
         kalmanposese3.t_i         = timestamp_ms_valid(idx_t_3damode);
 
-        if(idx_t_3damode == 895)
-            a=1;
-        end
-
         [T_icpnow_icpinit, ukf] = kalmanPoseSE3_v2(kalmanposese3.Ts_est, ...
                                                    kalmanposese3.t, ...
                                                    kalmanposese3.T_meas_i, ...
@@ -300,9 +317,9 @@ for idx_t_3damode = 1:n_timestamp_valid
     current_boneCTtri_est    = triangulation(boneCTstl_original.ConnectivityList, current_boneCTpoints_est(1:3,:)');
 
     % 1.4) Store the transformation
-    % Ts_icpnow_icpprev{idx_t_3damode} = T_icpnow_icpprev;
-    Ts_icpnow_icpinit{idx_t_3damode}   = T_icpnow_icpinit;
-    Ts_boneEst_ref{idx_t_3damode}      = T_boneEst_ref;
+    Ts_icpnow_icpprev{idx_t_3damode} = T_icpnow_icpprev;
+    Ts_icpnow_icpinit{idx_t_3damode} = T_icpnow_icpinit;
+    Ts_boneEst_ref{idx_t_3damode}    = T_boneEst_ref;
 
 
     % 2) Ground Truth Part ------------------------------------------------
@@ -384,37 +401,19 @@ close(h);
 
 %%
 
-
-% Ts_boneEst_ref_3dmat       = cat(3, Ts_boneEst_ref{:});
-% ts_boneEst_ref             = squeeze(Ts_boneEst_ref_3dmat(1:3, 4, :));
+% % Post process the Ts_boneEst_ref we have.
+% Ts_boneEst_ref_3dmat = cat(3, Ts_boneEst_ref{:});
 % Ts_boneEstSmooth_ref_3dmat = smoothTransformations(Ts_boneEst_ref_3dmat, 'method', 'sgolay', 'window', 30);
-% ts_boneEstSmooth_ref       = squeeze(Ts_boneEstSmooth_ref_3dmat(1:3, 4, :));
-% 
-% Ts_boneGT_ref_3dmat    = cat(3, Ts_boneGT_ref{:});
-% ts_boneGT_ref = squeeze(Ts_boneGT_ref_3dmat(1:3, 4, :));
-% 
-% fig2 = figure;
-% ax2 = axes(fig2);
-% plot3(ax2, ts_boneGT_ref(1,:), ts_boneGT_ref(2,:), ts_boneGT_ref(3,:), '-ob'); grid on; axis equal; hold on;
-% plot3(ax2, ts_boneEstSmooth_ref(1,:), ts_boneEstSmooth_ref(2,:), ts_boneEstSmooth_ref(3,:), '-or');
-% 
-% errors_T_mat  = cat(1, errors_T{:});
-% errors_T_mean = mean(abs(errors_T_mat), 1);
-% fprintf('Mean Absolute Error T = %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n', errors_T_mean);
-
-% Post process the Ts_boneEst_ref we have.
-Ts_boneEst_ref_3dmat = cat(3, Ts_boneEst_ref{:});
-Ts_boneEstSmooth_ref_3dmat = smoothTransformations(Ts_boneEst_ref_3dmat, 'method', 'sgolay', 'window', 30);
-Ts_boneEstSmooth_ref = squeeze( num2cell(Ts_boneEstSmooth_ref_3dmat, [1 2]) );
+% Ts_boneEstSmooth_ref = squeeze( num2cell(Ts_boneEstSmooth_ref_3dmat, [1 2]) );
 
 % Construct the table
 all_TsReg_table = table( timestamp_idcs_valid, timestamp_ms_valid, ...
-                         Ts_icpnow_icpprev, Ts_icpnow_icpinit, Ts_boneEst_ref, Ts_boneEstSmooth_ref, Ts_boneGT_ref, ...
-                         errors_T, errors_rmse_us2regbone, errors_rmse_regbone2gtbone, ...
+                         Ts_icpnow_icpprev, Ts_icpnow_icpinit, Ts_boneEst_ref, Ts_boneGT_ref, ...
+                         errors_T, errors_rmse_us2regbone, errors_rmse_regbone2gtbone, is_invalid, ...
                          'VariableNames', ...
                          {'Timestamp_idx', 'Timestamp_ms', ...
-                         'Ts_icpnow_icpprev', 'Ts_icpnow_icpinit', 'Ts_boneEst_ref', 'Ts_boneEstSmooth_ref', 'Ts_boneGT_ref', ...
-                         'errors_T', 'errors_rmse_us2regbone', 'errors_rmse_regbone2gtbone'});
+                         'Ts_icpnow_icpprev', 'Ts_icpnow_icpinit', 'Ts_boneEst_ref', 'Ts_boneGT_ref', ...
+                         'errors_T', 'errors_rmse_us2regbone', 'errors_rmse_regbone2gtbone', 'is_invalid'});
 
 
 % Save the data

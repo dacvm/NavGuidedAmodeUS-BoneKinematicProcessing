@@ -6,27 +6,27 @@ function [peak_threshold, prom_threshold] = adaptiveThreshInit(mmmode, init_dept
 %
 %   This function examines the signal strength within a specified depth
 %   window of an M-mode image and computes two adaptive thresholds:
-%     • peak_threshold    – the scaled maximum of a weighted median signal
-%     • prom_threshold    – a fraction of the peak_threshold, for prominence
+%     � peak_threshold    � the scaled maximum of a weighted median signal
+%     � prom_threshold    � a fraction of the peak_threshold, for prominence
 %
 %   Inputs:
-%     mmmode           – 2D matrix representing the processed M-mode image
-%     init_depth_idx   – scalar index (row) for the center of the depth window
-%     init_window_idx  – half-width (in rows) of the depth window
-%     display          – boolean flag; if true, plot the windowed signals
+%     mmmode           � 2D matrix representing the processed M-mode image
+%     init_depth_idx   � scalar index (row) for the center of the depth window
+%     init_window_idx  � half-width (in rows) of the depth window
+%     display          � boolean flag; if true, plot the windowed signals
 %
 %   Outputs:
-%     peak_threshold   – 0.7 × max(weighted median signal in window)
-%     prom_threshold   – 0.3 × peak_threshold
+%     peak_threshold   � 0.7 � max(weighted median signal in window)
+%     prom_threshold   � 0.3 � peak_threshold
 %
 %   Example:
-%     % use a ±10-row window around depth row 50, and show plots
+%     % use a �10-row window around depth row 50, and show plots
 %     [pth, prm] = adaptiveThreshInit(mmode_img, 50, 10, true);
 %
 %   Notes:
-%     – A Gaussian window (Gausswin) weights the median signal before
+%     � A Gaussian window (Gausswin) weights the median signal before
 %       finding its maximum.
-%     – The prominence threshold is set lower for downstream peak
+%     � The prominence threshold is set lower for downstream peak
 %       prominence calculations.
 %
 %   See also median, gausswin, max, plot
@@ -60,12 +60,12 @@ function [peak_threshold, prom_threshold] = adaptiveThreshInit(mmmode, init_dept
 
 
     % Initialize peak threshold to 70% of that maximum
-    % peak_threshold = 0.7 * signalclipped_max;
-    peak_threshold = 0.75 * signalclipped_max;
+    peak_threshold = 0.7 * signalclipped_max;
+    % peak_threshold = 0.75 * signalclipped_max;
 
     % Set prominence threshold to 30% of the peak threshold
-    % prom_threshold = 0.3 * peak_threshold;
-    prom_threshold = 0.4 * peak_threshold;
+    prom_threshold = 0.3 * peak_threshold;
+    % prom_threshold = 0.4 * peak_threshold;
 
 
     % Check the threshold if it falls below noise level

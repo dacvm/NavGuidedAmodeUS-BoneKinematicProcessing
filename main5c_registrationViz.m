@@ -8,7 +8,7 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
+path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
 dir_trial    = "trial_0023_Session4_04";
@@ -120,7 +120,7 @@ if(is_colorful)
     % GT
     cmap = winter(n_data_valid);
     for i = 1:(n_data_valid-1)
-        % plot segment [i → i+1]
+        % plot segment [i  i+1]
         plot3( ts_boneGT_ref(1,i:i+1), ts_boneGT_ref(2,i:i+1), ts_boneGT_ref(3,i:i+1), '-', ...
                'Color'           , cmap(i,:), ...
                'MarkerFaceColor' , cmap(i,:), ...
@@ -135,7 +135,7 @@ if(is_colorful)
     % ESt
     cmap = autumn(n_data_valid);
     for i = 1:(n_data_valid-1)
-        % plot segment [i → i+1]
+        % plot segment [i  i+1]
         plot3( ts_boneEstSmooth_ref(1,i:i+1), ts_boneEstSmooth_ref(2,i:i+1), ts_boneEstSmooth_ref(3,i:i+1), '-', ...
                'Color'           , cmap(i,:), ...
                'MarkerFaceColor' , cmap(i,:), ...

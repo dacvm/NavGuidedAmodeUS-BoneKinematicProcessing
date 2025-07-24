@@ -12,32 +12,32 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
-
-% [EDIT] directory to the trial
-% dir_trial    = "trial_0023_Session4_04";
-dir_trial    = "trial_0011_Session3_02";
+path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] Change the data you are using accordingly. 
 % ------ dir_depthdata is created by main1_processDepthData.m
 % ------ dir_Tdata is created by main3_registrationWithTime.m
-% dir_depthdata = 'depthdata_s4_m04_20250708-172830';  % with-navigation
-% dir_Tdata     = 'Tdata_s4_m04_20250710-074800';      % no-kalman 
-% dir_Tdata     = 'Tdata_s4_m04_20250719-180432';      % with-kalman
+dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250724-100122'), ...   % with-nav
+               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250724-030951'), ...   % no-nav, manual
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250724-032542')};      % no-nav, auto, 2x noise
 
-dir_depthdata = 'depthdata_s3_m02_20250722-114731';    % without-navigation, manual
-dir_Tdata     = 'Tdata_s3_m02_20250723-152902';
+% [EDIT] select which data you want to show
+idx_dir_Tdata = 1;
 
 % [EDIT] Change this to select the pin [femur, tibia], 1 -> PRO, 2-> DIS
 idcs_pin = [1, 1];
 
 % [EDIT] For displaying [amode3d, tibiaest, femur and tibiagt]
-is_display.amode3d  = true;
-is_display.tibiaest = true;
-is_display.bonegt   = [true, false];
+is_display.amode3d  = false;
+is_display.tibiaest = false;
+is_display.bonegt   = [false, false];
+
+% [EDIT] method for calculation
+kneeJoint_method = 3;
 
 % [EDIT] for saving the resulting mat file
 is_saveMat = false;
+
 
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -48,16 +48,21 @@ path_outputs      = fullfile(path_root, 'outputs');
 path_data         = fullfile(path_root, 'data');
 
 % declare some of important path of the data
-path_bonescan     = fullfile(path_data, dir_trial, 'bonescan');
-path_intermediate = fullfile(path_data, dir_trial, 'intermediate');
-path_measurement  = fullfile(path_data, dir_trial, 'measurement');
 path_bonestl  = fullfile(path_root, "data", "ct", "bone");
-
-% declare the path which consists of processed depth data
-path_outputdepth = fullfile(path_outputs, 'output_allest', dir_depthdata);
 
 % Generate path to function directory
 addpath(genpath(path_function));
+
+% Get the depthdata and the Tdata folder
+tmp_str       = strsplit(dirs_Tdata{idx_dir_Tdata}, {'\'});
+dir_depthdata = tmp_str{1};
+dir_Tdata     = tmp_str{2};
+
+% Get the necessary information about which data that we will use. 
+% I am taking the advantage of the naming format of the data and folders
+tmp_str  = strsplit(dirs_Tdata{idx_dir_Tdata}, {'_', '\'});
+sess_str = tmp_str{2};
+meas_str = tmp_str{3};
 
 
 %% INITIALIZE SOME DATA
@@ -88,19 +93,18 @@ run('extra_structCTdata.m');
 % the mat file already, check the snippet code for loading in
 % main_2_process3Damode.m)
 % load('all_rigidbodies_table_s4_m04_d01.mat');
-load('all_rigidbodies_table_s3_m02_d01.mat');
+% load('all_rigidbodies_table_s3_m02_d01.mat');
+mat_filename = sprintf('all_rigidbodies_table_%s_%s_d01.mat', sess_str, meas_str);
+load(mat_filename);
 
 % 3) Load the depth data (all_depthestmean_table and all_deptheststd_table)
-tmp_str = split(dir_trial, '_');
-sess_str = tmp_str{3};
-meas_str = tmp_str{4};
-mat_filename = sprintf('all_amode3d_s%s_m%s.mat', sess_str(end), meas_str);
-mat_fullpath = fullfile(path_outputdepth, mat_filename);
+mat_filename = sprintf('all_amode3d_%s_%s.mat', sess_str, meas_str);
+mat_fullpath = fullfile(path_outputs, 'output_allest', dir_depthdata, mat_filename);
 load(mat_fullpath);
 
 % 4) Load the T data from registration
-mat_filename = sprintf('all_TsReg_s%s_m%s.mat', sess_str(end), meas_str);
-mat_fullpath = fullfile(path_outputdepth, dir_Tdata, mat_filename);
+mat_filename = sprintf('all_TsReg_%s_%s.mat', sess_str, meas_str);
+mat_fullpath = fullfile(path_outputs, 'output_allest', dirs_Tdata{idx_dir_Tdata}, mat_filename);
 load(mat_fullpath);
 
 % 3) There is this thing called REF. 
@@ -127,6 +131,35 @@ ylabel(ax1, 'Y');
 zlabel(ax1, 'Z');
 view(ax1, 30,15);
 
+%% EXTRA (HANDLING INVALID DATA)
+
+% copy the table first to leave the original untouched
+all_TsReg_tablecopy = all_TsReg_table;
+
+% find the problematic rows
+idcs_problematicRows = find(all_TsReg_table.is_invalid);
+% delete the problematic rows
+all_TsReg_tablecopy(idcs_problematicRows, :) = [];
+
+% Post process the Ts_boneEst_ref we have.
+Ts_boneEst_ref_3dmat = cat(3, all_TsReg_tablecopy.Ts_boneEst_ref{:});
+Ts_boneEstSmooth_ref_3dmat = smoothTransformations(Ts_boneEst_ref_3dmat, 'method', 'sgolay', 'window', 20);
+Ts_boneEstSmooth_ref = squeeze( num2cell(Ts_boneEstSmooth_ref_3dmat, [1 2]) );
+
+% --- create a full‑length column full of empty cells ---------------
+nRows = height(all_TsReg_table);
+Ts_boneEstSmooth_ref_full = repmat({eye(4)}, nRows, 1);
+
+% --- place the smoothed transforms back in the right rows ----------
+validRows = ~all_TsReg_table.is_invalid;
+Ts_boneEstSmooth_ref_full(validRows) = Ts_boneEstSmooth_ref;
+
+% --- attach it to the original table -------------------------------
+% all_TsReg_table.Ts_boneEstSmooth_ref = Ts_boneEstSmooth_ref_full;
+all_TsReg_table = addvars( all_TsReg_table, Ts_boneEstSmooth_ref_full, ...
+                           'After', 'Ts_boneEst_ref', ...
+                           'NewVariableNames', 'Ts_boneEstSmooth_ref');
+
 
 %% MAIN PROGRAM
 
@@ -140,18 +173,13 @@ n_timestamp_valid    = length(timestamp_idcs_valid);
 
 % Allocate memory for storing all femur and tibia (est and gt)
 % transformation. Later we will put them into one single table
-Ts_femurGT_ref      = cell(n_timestamp_valid,1);
-Ts_tibiaGT_ref      = cell(n_timestamp_valid,1);
-Ts_tibiaEst_ref     = cell(n_timestamp_valid,1);
-kneeJoint6DOFs_gt   = cell(n_timestamp_valid,1);
-kneeJoint6DOFs_est  = cell(n_timestamp_valid,1);
+Ts_femurGT_ref       = cell(n_timestamp_valid,1);
+Ts_tibiaGT_ref       = cell(n_timestamp_valid,1);
+Ts_tibiaEst_ref      = cell(n_timestamp_valid,1);
+kneeJoint6DOFs_gt    = cell(n_timestamp_valid,1);
+kneeJoint6DOFs_est   = cell(n_timestamp_valid,1);
 errors_kneeJoint6DOF = cell(n_timestamp_valid, 1);
-
-% Post process the Ts_boneEst_ref we have.
-Ts_boneEst_ref_3dmat = cat(3, all_TsReg_table.Ts_boneEst_ref{:});
-Ts_boneEstSmooth_ref_3dmat = smoothTransformations(Ts_boneEst_ref_3dmat, 'method', 'sgolay', 'window', 50);
-Ts_boneEstSmooth_ref = squeeze( num2cell(Ts_boneEstSmooth_ref_3dmat, [1 2]) );
-all_TsReg_table.Ts_boneEstSmooth_ref = Ts_boneEstSmooth_ref;
+is_invalid           = zeros(n_timestamp_valid, 1);
 
 % initialize waitbar, so the user not get bored
 h = waitbar(0, 'Please wait...');
@@ -167,6 +195,18 @@ for idx_t_3damode = 1:n_timestamp_valid
     delete(findobj(ax1, 'Tag', '3d_bone_gt'));
     delete(findobj(ax1, 'Tag', 'cs_bone_est'));
     delete(findobj(ax1, 'Tag', 'cs_bone_gt'));
+
+    % If there is invalid registration, skipped.
+    if(all_TsReg_table.is_invalid(idx_t_3damode))
+        Ts_femurGT_ref{idx_t_3damode}       = eye(4);
+        Ts_tibiaGT_ref{idx_t_3damode}       = eye(4);
+        Ts_tibiaEst_ref{idx_t_3damode}      = eye(4);
+        kneeJoint6DOFs_gt{idx_t_3damode}    = zeros(1, 6);
+        kneeJoint6DOFs_est{idx_t_3damode}   = zeros(1, 6);
+        errors_kneeJoint6DOF{idx_t_3damode} = zeros(1, 6);
+        is_invalid(idx_t_3damode)           = 1;
+        continue;
+    end
 
     % 1) AMODE 3D PART ----------------------------------------------------
     
@@ -255,11 +295,13 @@ for idx_t_3damode = 1:n_timestamp_valid
     % 3) CALCULATE JOINT KINEMATICS (EST AND GT) --------------------------
 
     % 1) Calculate the knee joint 6Dof values (gt and est)
-    % % The function below is mine, i am not sure that it is correct or not
-    [T_est, r_est, t_est] = generateKneeJointCS_v2(Ts_femurGT_ref{idx_t_3damode}, T_boneEst_ref, 'r');
-    [T_gt, r_gt, t_gt]    = generateKneeJointCS_v2(Ts_femurGT_ref{idx_t_3damode}, Ts_tibiaGT_ref{idx_t_3damode}, 'r');
-    r_est = rad2deg(r_est);
-    r_gt = rad2deg(r_gt);
+
+    % The function below is mine, i am not sure that it is correct or not
+    if(kneeJoint_method==1)
+        [T_est, r_est, t_est] = generateKneeJointCS_v2(Ts_femurGT_ref{idx_t_3damode}, T_boneEst_ref, 'r');
+        [T_gt, r_gt, t_gt]    = generateKneeJointCS_v2(Ts_femurGT_ref{idx_t_3damode}, Ts_tibiaGT_ref{idx_t_3damode}, 'r');
+        r_est = rad2deg(r_est);
+        r_gt = rad2deg(r_gt);
 
     % The function below, i got from Miriam (ORL, RadboudUMC). They usually
     % construct the R matrix by stacking the basis vector of the ACS
@@ -267,31 +309,34 @@ for idx_t_3damode = 1:n_timestamp_valid
     % Consequently the function below also requires the similar structure. 
     % Since i use the column-wise R, before i feed to this function i need
     % to transpose it first.
-    % T_femurGT_ref = Ts_femurGT_ref{idx_t_3damode};
-    % r_est = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_boneEst_ref(1:3, 1:3)', 'right');
-    % % This one, i have no clue why this operation, but i just following
-    % % them. Note. They use row translation vector, i use column, so i need
-    % % to transpose it first; See the R in the end of the operation? here i 
-    % % didn't put a transpose, because the original one put a transpose on it.
-    % t_est = (T_boneEst_ref(1:3, 4)' - T_femurGT_ref(1:3, 4)') * T_femurGT_ref(1:3, 1:3);
-    % 
-    % % Below is basically the same as above, just for GT
-    % T_tibiaGT_ref = Ts_tibiaGT_ref{idx_t_3damode};
-    % r_gt = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_tibiaGT_ref(1:3, 1:3)', 'right');
-    % t_gt = (T_tibiaGT_ref(1:3, 4)' - T_femurGT_ref(1:3, 4)') * T_femurGT_ref(1:3, 1:3);
+    elseif(kneeJoint_method==2)
+        T_femurGT_ref = Ts_femurGT_ref{idx_t_3damode};
+        r_est = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_boneEst_ref(1:3, 1:3)', 'right');
+        % This one, i have no clue why this operation, but i just following
+        % them. Note. They use row translation vector, i use column, so i need
+        % to transpose it first; See the R in the end of the operation? here i 
+        % didn't put a transpose, because the original one put a transpose on it.
+        t_est = (T_boneEst_ref(1:3, 4)' - T_femurGT_ref(1:3, 4)') * T_femurGT_ref(1:3, 1:3);
+    
+        % Below is basically the same as above, just for GT
+        T_tibiaGT_ref = Ts_tibiaGT_ref{idx_t_3damode};
+        r_gt = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_tibiaGT_ref(1:3, 1:3)', 'right');
+        t_gt = (T_tibiaGT_ref(1:3, 4)' - T_femurGT_ref(1:3, 4)') * T_femurGT_ref(1:3, 1:3);
 
 
-    % % My implementation of what Miriam did, which is basically just Tibia
-    % % ACS relative to Femur ACS. Below is for estimation
-    % T_femurGT_ref      = Ts_femurGT_ref{idx_t_3damode};
-    % T_tibiaEst_femurGT = inv(T_femurGT_ref) * T_boneEst_ref;
-    % r_est = rad2deg(rotm2eul(T_tibiaEst_femurGT(1:3, 1:3), 'ZYX'));
-    % t_est = T_tibiaEst_femurGT(1:3, 4)';
-    % % Below is for ground truth
-    % T_tibiaGT_ref      = Ts_tibiaGT_ref{idx_t_3damode};
-    % T_tibiaGT_femurGT = inv(T_femurGT_ref) * T_tibiaGT_ref;
-    % r_gt = rad2deg(rotm2eul(T_tibiaGT_femurGT(1:3, 1:3), 'ZYX'));
-    % t_gt = T_tibiaGT_femurGT(1:3, 4)';
+    % My implementation of what Miriam did, which is basically just Tibia
+    % ACS relative to Femur ACS. Below is for estimation
+    elseif(kneeJoint_method==3)
+        T_femurGT_ref      = Ts_femurGT_ref{idx_t_3damode};
+        T_tibiaEst_femurGT = inv(T_femurGT_ref) * T_boneEst_ref;
+        r_est = rad2deg(rotm2eul(T_tibiaEst_femurGT(1:3, 1:3), 'ZYX'));
+        t_est = T_tibiaEst_femurGT(1:3, 4)';
+        % Below is for ground truth
+        T_tibiaGT_ref      = Ts_tibiaGT_ref{idx_t_3damode};
+        T_tibiaGT_femurGT = inv(T_femurGT_ref) * T_tibiaGT_ref;
+        r_gt = rad2deg(rotm2eul(T_tibiaGT_femurGT(1:3, 1:3), 'ZYX'));
+        t_gt = T_tibiaGT_femurGT(1:3, 4)';
+    end
 
     %  Store the GT
     kneeJoint6DOFs_est{idx_t_3damode}  = [t_est, r_est];
@@ -310,16 +355,18 @@ close(h);
 % Construct the table
 all_kneeJoint6DOFs_table = table( timestamp_idcs_valid, timestamp_ms_valid, ...
                                   Ts_femurGT_ref, Ts_tibiaGT_ref, Ts_tibiaEst_ref, ...
-                                  kneeJoint6DOFs_gt, kneeJoint6DOFs_est, errors_kneeJoint6DOF, ...
+                                  kneeJoint6DOFs_gt, kneeJoint6DOFs_est, errors_kneeJoint6DOF, is_invalid, ...
                                   'VariableNames', ...
                                   {'Timestamp_idx', 'Timestamp_ms', ...
                                   'Ts_femurGT_ref', 'Ts_tibiaGT_ref', 'Ts_tibiaEst_ref', ...
-                                  'kneeJoint6DOFs_gt', 'kneeJoint6DOFs_est', 'error_kneeJoint6DOF'});
+                                  'kneeJoint6DOFs_gt', 'kneeJoint6DOFs_est', 'error_kneeJoint6DOF', 'is_invalid'});
 
 % Save the data
 if (is_saveMat)
     % save
-    mat_filename = sprintf('all_kneeJoint6DOFs_s%s_m%s.mat', sess_str(end), meas_str);
-    mat_fullpath = fullfile(path_outputdepth, dir_Tdata, mat_filename);
-    save(mat_fullpath, 'all_kneeJoint6DOFs_table');
+    mat_filename = sprintf('all_kneeJoint6DOFs_%s_%s.mat', sess_str, meas_str);
+    mat_fullpath = fullfile(path_outputs, 'output_allest', dirs_Tdata{idx_dir_Tdata}, mat_filename);
+    save(mat_fullpath, 'all_kneeJoint6DOFs_table', 'kneeJoint_method');
 end
+
+% run('main5a_kinematicEval.m');

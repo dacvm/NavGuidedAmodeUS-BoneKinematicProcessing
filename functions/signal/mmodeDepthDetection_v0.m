@@ -1,4 +1,4 @@
-function estimatedbone_proc = mmodeDepthDetection_v0(mmode, depth_unit, peakparam, clusterparam, outlierparam, smoothingparam, axis_result, display_process)
+function estimatedbone_proc = mmodeDepthDetection_v0(mmode, depth_unit, seed, peakparam, clusterparam, outlierparam, smoothingparam, axis_result, display_process)
 
 % get the length data
 length_data       = size(mmode, 2);
@@ -26,7 +26,7 @@ end
 
 
 % estimate bone cluster
-[f, data_cleaned, ~, fig2] = estimateBoneCluster_v3( allpeaks_mm, [], clusterparam, outlierparam, smoothingparam, display_process);
+[f, data_cleaned, ~, fig2] = estimateBoneCluster_v3( allpeaks_mm, seed, clusterparam, outlierparam, smoothingparam, display_process);
 
 % get the points based from the line estimation
 detectedbone_X    = data_cleaned(1,1):data_cleaned(end, 1);

@@ -34,7 +34,6 @@ if nargin < 5 || isempty(ukf)
     x0 = [p(3,:)'; v23'; a_lin'; q(3,:)'; w23'; a_ang'];   % 191 column
 
     % --- covariances & filter object ---
-    % P0 = blkdiag(1e-4*eye(3),1e-3*eye(3),1e-2*eye(3),1e-6*eye(4),1e-3*eye(3),1e-2*eye(3));
     P0 = blkdiag(1.0*eye(3), ...
                  1.0*eye(3), ...
                  1.0*eye(3), ...
@@ -43,7 +42,6 @@ if nargin < 5 || isempty(ukf)
                  1.0*eye(3));
 
     % Process Noise
-    % Q  = blkdiag(1e-6*eye(3),1e-5*eye(3),1e-4*eye(3),1e-8*eye(4),1e-5*eye(3),1e-4*eye(3));
     Q  = blkdiag(1.0*eye(3), ...
                  2.0*eye(3), ...
                  3.0*eye(3), ...
@@ -52,9 +50,8 @@ if nargin < 5 || isempty(ukf)
                  3.0*eye(3));
 
     % Measurement Noise
-    % Rm = blkdiag(5e-4*eye(3),2e-4*eye(4));
-    sigma_pos = 1.0;            % mm
-    sigma_ang = deg2rad(1.0);   % deg
+    sigma_pos = 1.5;            % mm
+    sigma_ang = deg2rad(2.0);   % degree
     Rm = blkdiag(sigma_pos.^2 * eye(3), ...
                  sigma_ang.^2 * eye(4));
 
@@ -79,7 +76,7 @@ end
 R_meas = T_meas(1:3,1:3);
 t_meas = T_meas(1:3,4);
 
-% Orthonormalise with SVD  ⇒  R_meas ∈ SO(3)
+% Orthonormalise with SVD    R_meas  SO(3)
 [U,~,V] = svd(R_meas);
 R_meas  = U*V.';
 if det(R_meas) < 0                   % make sure det = +1 (no reflection)
@@ -87,21 +84,21 @@ if det(R_meas) < 0                   % make sure det = +1 (no reflection)
     R_meas = U*V.';
 end
 
-qMeas = rotm2quat(R_meas).';         % 4×1 column  [w x y z]
+qMeas = rotm2quat(R_meas).';         % 41 column  [w x y z]
 
 % Align quaternion hemisphere with prediction
-qPred = ukf.State(10:13);            % 4×1 column
+qPred = ukf.State(10:13);            % 41 column
 if dot(qPred,qMeas) < 0, qMeas = -qMeas; end
 
-z = [t_meas; qMeas];                 % 7×1 measurement vector
+z = [t_meas; qMeas];                 % 71 measurement vector
 
 % 3b. Validate & update
 if all(isfinite(z))
     correct(ukf, z);                 % <- UKF update
-    ukf.State(10:13) = quatnormalize(ukf.State(10:13).').'; % stay on S³
+    ukf.State(10:13) = quatnormalize(ukf.State(10:13).').'; % stay on S
 else
     warning('kalmanPoseSE3:BadMeasurement', ...
-            'Non-finite measurement detected – update skipped, prediction kept.');
+            'Non-finite measurement detected  update skipped, prediction kept.');
 end
 
 %% 4. Return updated pose -------------------------------------------------------------

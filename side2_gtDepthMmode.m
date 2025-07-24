@@ -6,7 +6,7 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
+path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
 dir_trial    = "trial_0023_Session4_04";
@@ -196,7 +196,7 @@ for ust_idx=1:n_ust_selected
     ub = ust_config_selected(ust_idx).UpperBound;
     % display_mmode_window(ax1{ust_idx}, lb, m, ub);
     plot(ax1{ust_idx}, 0, m, 'or', 'MarkerFaceColor', 'r', 'MarkerSize',12);
-    rectangle(ax1{ust_idx}, 'Position', [0, lb, 20, ub-lb], 'FaceColor', 'r', 'EdgeColor', 'none', 'FaceAlpha', 0.5);
+    % rectangle(ax1{ust_idx}, 'Position', [0, lb, 20, ub-lb], 'FaceColor', 'r', 'EdgeColor', 'none', 'FaceAlpha', 0.5);
 
 
     % [5] -----------------------------------------------------------------
