@@ -64,7 +64,7 @@ for idx_dof = 1:6
     hold(ax1(idx_dof), 'on');
     grid(ax1(idx_dof), 'on');
     axis(ax1(idx_dof), 'tight');
-    xlabel(ax1(idx_dof), 'Timestamp');
+    xlabel(ax1(idx_dof), 'Time (s)');
     if(idx_dof<=3)
         ylabel(ax1(idx_dof), 'mm');
     else
@@ -127,11 +127,21 @@ end
 
 
 %% EXTRA
+% - In the next part, we will plot our knee joint kinematic estimation
+%   (relative to the ground truth) for several methods. As i mentioned in
+%   the earlier section: different data, different length. This will be a
+%   problem when we want to plot them
+% - Our strategy is, we must search, from all the data (.mat) file we have, 
+%   which data has the longest number of timestamp given the selected cycle.
+% - Once we found it, that data will be our reference. Every other data
+%   should be "stretched" (normalized) against this data.
+% - In this particular part, we will obtain the stretched timestamp in ms
 
 % select cycle
 cycle_select             = [2,5];
 % to store the max timestamps
-max_timestamps = 0;
+max_val_timestamps     = 0;
+max_idxdata_timestamps = 0;
 
 % check which data has the longest timestamps for all cycle
 for idx_dir=1:n_dirs_Tdata
@@ -144,66 +154,104 @@ for idx_dir=1:n_dirs_Tdata
     n_timestamps_allcycle      = length(cycle_idxoriginal_select);
 
     % store the number if the current data  is longer than before
-    if(n_timestamps_allcycle>max_timestamps)
-        max_timestamps = n_timestamps_allcycle;
+    if(n_timestamps_allcycle>max_val_timestamps)
+        max_val_timestamps     = n_timestamps_allcycle;
+        max_idxdata_timestamps = idx_dir;
     end
 end
 
+% 1) Get the cycle_timestamps from the data that has the MAX number of timestamp
+cycle_timestamps         = all_cycle_timestamps{max_idxdata_timestamps};
+cycle_idxoriginal_select = [cycle_timestamps(cycle_select(1)), cycle_timestamps(cycle_select(2))];
+
+% 2) Get the table from the data that has the MAX number of timestamp
+all_kneeJoint6DOFs_table_select = all_kneeJoint6DOFs_tables{max_idxdata_timestamps};
+% -> delete problematic rows first
+idcs_problematicRows = find(all_kneeJoint6DOFs_table_select.is_invalid);
+all_kneeJoint6DOFs_table_select(idcs_problematicRows, :) = [];
+
+% 3) Get the valid timestamp
+timestamp_idcs_valid     = all_kneeJoint6DOFs_table_select.Timestamp_idx;
+timestamp_ms_valid       = all_kneeJoint6DOFs_table_select.Timestamp_ms;
+
+% 4) The indices that are shown in cycle_timestamps are the indices of the 
+%    table of the original measurement (purely from experiment without
+%    any processing at all). 
+% -> We make a lot of filtering process already, for example, removing some 
+%    invalid data. So, the all_kneeJoint6DOFs_table.Timestamp_idx might
+%    have holes within it.
+% -> By performing the process below, we will get to get the actual timestamp.
+tmp1 = find(timestamp_idcs_valid==cycle_idxoriginal_select(1));
+tmp2 = find(timestamp_idcs_valid==cycle_idxoriginal_select(2));
+cycle_idxvalid_select = [tmp1, tmp2];
+
+% 5) Get the selected timestamp_ms
+timestamp_ms_valid_select  = timestamp_ms_valid(cycle_idxvalid_select(1):cycle_idxvalid_select(2));
+timestamp_ms_valid_select0 = timestamp_ms_valid_select - timestamp_ms_valid_select(1);
+
+% 6) Stretch the value
+timestamp_ms_valid_select0_valuestretched = imresize(timestamp_ms_valid_select0, [max_val_timestamps 1], 'bicubic');
 
 
 
-%%
+%% MAIN PROGRAM
+% I tried to make the numbering (steps of program) consistent with
+% main5a_kinematicEval2.m. Hopefuly by doing this it is easier to
+% read this script and that script.
 
 for idx_dir=1:n_dirs_Tdata
 
-    % get the current data
-    all_kneeJoint6DOFs_table = all_kneeJoint6DOFs_tables{idx_dir};
-    cycle_timestamps = all_cycle_timestamps{idx_dir};
+    % 1) Get the current data for cycle_timestamps
+    cycle_timestamps         = all_cycle_timestamps{idx_dir};
+    cycle_idxoriginal_select = [cycle_timestamps(cycle_select(1)), cycle_timestamps(cycle_select(2))];
 
-    % delete problematic rows
+    % 2) Get the current data for knee joint data
+    all_kneeJoint6DOFs_table = all_kneeJoint6DOFs_tables{idx_dir};
+    % -> delete problematic rows first
     idcs_problematicRows = find(all_kneeJoint6DOFs_table.is_invalid);
     all_kneeJoint6DOFs_table(idcs_problematicRows, :) = [];
 
-    % Grab the valid index
+    % 3) Get the valid timestamp
     timestamp_idcs_valid = all_kneeJoint6DOFs_table.Timestamp_idx;
     timestamp_ms_valid = all_kneeJoint6DOFs_table.Timestamp_ms;
-    
-    % Grab the knee joint 6dof and convert it into matrix
-    kneeJoint6DOFs_est = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_est);
-    kneeJoint6DOFs_gt  = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_gt);
 
-    % get the cycle
-    cycle_idxoriginal_select = [cycle_timestamps(cycle_select(1)), cycle_timestamps(cycle_select(2))];
-
-    % The indices that are shown in cycle_timestamp is the indices of the table
-    % original measurement. We make a lot of filtering process already
-    % (removing some invalid data). So we need to get the actual timestamp.
+    % 4) The indices that are shown in cycle_timestamps are the indices of the 
+    %    table of the original measurement (purely from experiment without
+    %    any processing at all). 
+    % -> We make a lot of filtering process already, for example, removing some 
+    %    invalid data. So, the all_kneeJoint6DOFs_table.Timestamp_idx might
+    %    have holes within it.
+    % -> By performing the process below, we will get to get the actual timestamp.
     tmp1 = find(timestamp_idcs_valid==cycle_idxoriginal_select(1));
     tmp2 = find(timestamp_idcs_valid==cycle_idxoriginal_select(2));
     cycle_idxvalid_select = [tmp1, tmp2];
 
+    % 5) Grab the knee joint 6dof and convert it into matrix
+    kneeJoint6DOFs_est = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_est);
+    kneeJoint6DOFs_gt  = cell2mat(all_kneeJoint6DOFs_table.kneeJoint6DOFs_gt);
+
     % loop for all dofs
     for idx_dof=1:6
     
-        % get the current est dof
+        % 1) Get the current est dof
         currentDoF_kneeJoint_est = kneeJoint6DOFs_est(cycle_idxvalid_select(1):cycle_idxvalid_select(2), idx_dof);
         currentDoF_kneeJoint_est = smoothdata(currentDoF_kneeJoint_est, 'rlowess', 20);
 
-        % get the current gt dof
+        % 2) Get the current gt dof
         currentDoF_kneeJoint_gt = kneeJoint6DOFs_gt(cycle_idxvalid_select(1):cycle_idxvalid_select(2), idx_dof);
     
-        % calculate the difference
+        % 3) Calculate the difference
         currentDoF_kneeJoint_estgtdiff = currentDoF_kneeJoint_est - currentDoF_kneeJoint_gt;
 
-        % stretch the value, here i am using imresize from image processing
-        % tool box, because why not? they already have built-in
-        currentDoF_kneeJoint_est_valuestretched       = imresize(currentDoF_kneeJoint_est, [max_timestamps 1], 'bicubic');
-        currentDoF_kneeJoint_estgtdiff_valuestretched = imresize(currentDoF_kneeJoint_estgtdiff, [max_timestamps 1], 'bicubic');
+        % 4) Stretch the value, here i am using imresize from image 
+        %    processing tool box, because why not? they already have built-in
+        currentDoF_kneeJoint_est_valuestretched       = imresize(currentDoF_kneeJoint_est, [max_val_timestamps 1], 'bicubic');
+        currentDoF_kneeJoint_estgtdiff_valuestretched = imresize(currentDoF_kneeJoint_estgtdiff, [max_val_timestamps 1], 'bicubic');
     
-        % plot the knee joint for the current dof
-        plot(ax1(idx_dof), currentDoF_kneeJoint_estgtdiff_valuestretched, '-', 'Color', c(idx_dir+1, :), 'LineWidth', 3);
+        % 5) Plot the knee joint for the current dof
+        plot(ax1(idx_dof), timestamp_ms_valid_select0_valuestretched * 1e-3, currentDoF_kneeJoint_estgtdiff_valuestretched, '-', 'Color', c(idx_dir+1, :), 'LineWidth', 3);
     
-        % compute the quantitative result
+        % 6) Compute the quantitative result
         result_corr  = corr(currentDoF_kneeJoint_est, currentDoF_kneeJoint_gt);
         result_rmse  = sqrt( mean( (currentDoF_kneeJoint_estgtdiff).^2 ) );
         result_std   = std(currentDoF_kneeJoint_estgtdiff);
@@ -240,7 +288,7 @@ end
 
 for idx_dof = 1:6
     title(ax1(idx_dof), ax_title{idx_dof});
-    plot(ax1(idx_dof), zeros(length(currentDoF_kneeJoint_estgtdiff_valuestretched), 1), '-', 'Color', 'b', 'LineWidth', 3);
+    plot(ax1(idx_dof), timestamp_ms_valid_select0_valuestretched * 1e-3, zeros(length(currentDoF_kneeJoint_estgtdiff_valuestretched), 1), '-', 'Color', 'b', 'LineWidth', 3);
     legend(ax1(idx_dof), {'with-nav', 'no-nav, manual', 'no-nav, 2x-noise', 'Ground truth'});
 end
 

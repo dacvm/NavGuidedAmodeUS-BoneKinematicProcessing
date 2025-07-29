@@ -70,30 +70,18 @@ meas_str = tmp_str{3};
 % 1) Load and organize the struct for the CT data (allBone_CT)
 run('extra_structCTdata.m');
 
-% 2) Load the rigid body data that is stored in a .csv File
-% -- Use the dir function to find all files with the .csv extension in the
-%    directory. 
-% -- This .csv file is the recording of the rigid bodies from Qualisys. 
-% -- Here, we assume that there is always only one csv file the directory
-% fileList = dir(fullfile(path_measurement, folders_measurement{folder_idx}, '*.csv'));
-% 
-% % Check if the .csv file was found
-% if ~isempty(fileList)
-%     % Assuming there's only one CSV file, get its full name
-%     fullFileName = fullfile(path_measurement, folders_measurement{folder_idx}, fileList(1).name);
-%     % Read the CSV file and get the rigid bodies data (Table object)
-%     all_rigidbodies_table = readCSV_qualisysRigidBodies(fullFileName);
-% else
-%     % Display a message if no CSV file was found
-%     disp('No CSV file found in the specified directory.');
-%     return;
-% end
-
-% But because it is too long to load, i will use the shortcut (i generated
-% the mat file already, check the snippet code for loading in
-% main_2_process3Damode.m)
-% load('all_rigidbodies_table_s4_m04_d01.mat');
-% load('all_rigidbodies_table_s3_m02_d01.mat');
+% 2) Load the rigid body data that is stored in a .csv File.
+% -- This rigid body data contains every single rigid body that are tracked
+%    by qualisys, including pins and holders. We want to get the rigid
+%    bodies of bone pins during measurement later.
+% -- We need to load the rigid body data corresponds to the which session
+%    and which measurement our dir_depthdata came from. 
+% -- Since i have made the standard naming for them, for example:
+%    'depthdata_sX_mXX_DATE-TIME', we get the corresponding rigid body data
+%    automatically by taking the sX and the mXX string.
+% -- It is too long to load. So i have made a script to convert the .csv
+%    file to .mat file (check main0_generateRigidBodyMAT.m). 
+% -- By this, it will be much quicker
 mat_filename = sprintf('all_rigidbodies_table_%s_%s_d01.mat', sess_str, meas_str);
 load(mat_filename);
 
@@ -327,10 +315,12 @@ for idx_t_3damode = 1:n_timestamp_valid
     % My implementation of what Miriam did, which is basically just Tibia
     % ACS relative to Femur ACS. Below is for estimation
     elseif(kneeJoint_method==3)
+        % Below is for est
         T_femurGT_ref      = Ts_femurGT_ref{idx_t_3damode};
         T_tibiaEst_femurGT = inv(T_femurGT_ref) * T_boneEst_ref;
         r_est = rad2deg(rotm2eul(T_tibiaEst_femurGT(1:3, 1:3), 'ZYX'));
         t_est = T_tibiaEst_femurGT(1:3, 4)';
+
         % Below is for ground truth
         T_tibiaGT_ref      = Ts_tibiaGT_ref{idx_t_3damode};
         T_tibiaGT_femurGT = inv(T_femurGT_ref) * T_tibiaGT_ref;

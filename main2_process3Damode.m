@@ -9,22 +9,18 @@ clc; clear; close all;
 path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
-% dir_trial    = "trial_0023_Session4_04";
-dir_trial    = "trial_0011_Session3_02";
-
-% [EDIT] window configuration file
-% csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-04-10_15-53-56.csv';
-% csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-19_11-29-46_edited2025-07-22_10-31-50.csv';
+dir_trial    = "trial_0023_Session4_04";
+% dir_trial    = "trial_0011_Session3_02";
 
 % [EDIT] holder configuration file
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
 
 % [EDIT] Make sure you are using the correct depth data
-% dir_depthdata = 'depthdata_s4_m04_20250714-112513';
-% dir_depthdata = 'depthdata_s3_m02_20250722-114731';     % manual
-dir_depthdata = 'depthdata_s3_m02_20250722-174503';     % auto 1, tresh 2x normalized noise
-% dir_depthdata = 'depthdata_s3_m02_20250722-174812';     % auto 2, tresh 3x normalized noise
-% dir_depthdata = 'depthdata_s3_m02_20250722-180349';     % auto 3, tresh 4x normalized noise
+dir_depthdata = 'depthdata_s4_m04_20250714-112513';     % with-nav
+% dir_depthdata = 'depthdata_s3_m02_20250722-114731';     % no-nav, manual
+% dir_depthdata = 'depthdata_s3_m02_20250722-174503';     % no-nav, tresh 2x normalized noise
+% dir_depthdata = 'depthdata_s3_m02_20250722-174812';     % no-nav, tresh 3x normalized noise
+% dir_depthdata = 'depthdata_s3_m02_20250722-180349';     % no-nav, tresh 4x normalized noise
 
 % [EDIT] Specify folder index
 folder_idx = 1;
@@ -67,11 +63,7 @@ folders_measurement = {items_dir([items_dir.isdir] & ~ismember({items_dir.name},
 % the navigation system) we don't need that.
 folders_measurement(end) = [];
 
-% % 4) Load window configuration file
-% csv_fullpath = fullfile(path_intermediate, csvfile_windowconfig);
-% ust_windowconfig = table2struct(readtable(csv_fullpath));
-
-% 5) Load holder configuration file
+% 4) Load holder configuration file
 csv_fullpath = fullfile(path_data, 'configs', csvfile_holderconfig);
 ust_holderconfig = table2struct(readtable(csv_fullpath));
 % Find indices of structs where Group is not equal to 0, means that we are
@@ -79,6 +71,12 @@ ust_holderconfig = table2struct(readtable(csv_fullpath));
 indices = arrayfun(@(x) x.Group ~= 0, ust_holderconfig);
 % Create a new array of structs excluding those with Group equal to 0
 ust_holderconfig = ust_holderconfig(indices);
+
+% 6) Get the necessary information about which data that we will use. 
+% -- I am taking the advantage of the naming format of the dir_depthdata
+tmp_str = split(dir_depthdata, '_');
+sess_str = tmp_str{2};
+meas_str = tmp_str{3};
 
 
 %% INITIALIZE SOME RIGID BODY METADATA
@@ -133,35 +131,23 @@ end
 
 %% INITIALIZE SOME DATA
 
-% 1) Load the rigid body data that is stored in a .csv File
-% -- Use the dir function to find all files with the .csv extension in the
-%    directory. 
-% -- This .csv file is the recording of the rigid bodies from Qualisys. 
-% -- Here, we assume that there is always only one csv file the directory
-% fileList = dir(fullfile(path_measurement, folders_measurement{folder_idx}, '*.csv'));
-% 
-% % Check if the .csv file was found
-% if ~isempty(fileList)
-%     % Assuming there's only one CSV file, get its full name
-%     fullFileName = fullfile(path_measurement, folders_measurement{folder_idx}, fileList(1).name);
-%     % Read the CSV file and get the rigid bodies data (Table object)
-%     all_rigidbodies_table = readCSV_qualisysRigidBodies(fullFileName);
-% else
-%     % Display a message if no CSV file was found
-%     disp('No CSV file found in the specified directory.');
-%     return;
-% end
-
-% 2) But because it is too long to load, i will use the shortcut (i generated
-% the mat file already, check the snippet code for loading in
-% main_2_process3Damode.m)
-load('all_rigidbodies_table_s3_m02_d01.mat');
+% 1) Load the rigid body data (qualisys) that is stored in a .csv File.
+% -- This rigid body data contains every single rigid body that are tracked
+%    by qualisys, including pins and holders. We want to get the rigid
+%    bodies of the holder during the measurement later.
+% -- We need to load the rigid body data corresponds to the which session
+%    and which measurement our dir_depthdata came from. 
+% -- Since i have made the standard naming for them, for example:
+%    'depthdata_sX_mXX_DATE-TIME', we get the corresponding rigid body data
+%    automatically by taking the sX and the mXX string.
+% -- It is too long to load. So i have made a script to convert the .csv
+%    file to .mat file (check main0_generateRigidBodyMAT.m). 
+% -- By this, it will be much quicker
+mat_filename = sprintf('all_rigidbodies_table_%s_%s_d01.mat', sess_str, meas_str);
+load(mat_filename);
 
 % Load the depth data (all_depthestmean_table and all_deptheststd_table)
-tmp_str = split(dir_trial, '_');
-sess_str = tmp_str{3};
-meas_str = tmp_str{4};
-mat_filename = sprintf('all_depthest_s%s_m%s.mat', sess_str(end), meas_str);
+mat_filename = sprintf('all_depthest_%s_%s.mat', sess_str, meas_str);
 load(fullfile(path_outputdepth, mat_filename));
 
 
@@ -201,10 +187,6 @@ h = waitbar(0, 'Please wait...');
 % loop only for valid timestamp
 for idx_t = timestamp_idcs_valid
     %% LOOP FOR TIMESTAMPS
-
-    if(idx_t==1339)
-        a=1;
-    end
 
     % show the waitbar progress
     waitbar(idx_looptime/length(timestamp_idcs_valid), h, sprintf('Timestamp processed: %d/%d', idx_looptime, length(timestamp_idcs_valid)));
@@ -354,7 +336,7 @@ all_amode3d_table = table( timestamp_idcs_valid', timestamp_ms_valid, cell_point
 %   particular fine-tuned depth data
 if(is_saveMat)
     % save
-    mat_filename = sprintf('all_amode3d_s%s_m%s.mat', sess_str(end), meas_str);
+    mat_filename = sprintf('all_amode3d_%s_%s.mat', sess_str, meas_str);
     mat_fullpath = fullfile(path_outputdepth, mat_filename);
     save(mat_fullpath, 'all_amode3d_table');
 end
