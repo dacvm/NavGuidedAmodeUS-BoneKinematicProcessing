@@ -29,22 +29,19 @@ idx_pin  = 1;
 
 % [EDIT]
 is_displayRegProcess = false;
-is_saveMat = false;
-
-% [EDIT]
-% is_usenavigationdata = true;
+is_saveMat = true;
 
 % [EDIT] Everything related to PICP
 % path
 path_picp    = "D:\DennisChristie\SwarmPerturbation-ICP";
 % parameters
 params_picp.name               = 'tibia';
-params_picp.max_iters          = 20;
+params_picp.max_iters          = 30;
 params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 64;
+params_picp.n_candidate        = 256;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
