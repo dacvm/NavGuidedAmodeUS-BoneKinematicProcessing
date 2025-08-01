@@ -19,24 +19,25 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % ------ dir_Tdata is created by main3_registrationWithTime.m
 dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250724-100122'), ...   % with-nav
                fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250724-030951'), ...   % no-nav, manual
+               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-131010'), ...   % no-nav, manual, fulltimestamp
                fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250724-032542')};      % no-nav, auto, 2x noise
 
 % [EDIT] select which data you want to show
-idx_dir_Tdata = 1;
+idx_dir_Tdata = 3;
 
 % [EDIT] Change this to select the pin [femur, tibia], 1 -> PRO, 2-> DIS
 idcs_pin = [1, 1];
 
 % [EDIT] For displaying [amode3d, tibiaest, femur and tibiagt]
-is_display.amode3d  = true;
-is_display.tibiaest = true;
-is_display.bonegt   = [true, true];
+is_display.amode3d  = false;
+is_display.tibiaest = false;
+is_display.bonegt   = [false, false];
 
 % [EDIT] method for calculation
-kneeJoint_method = 1;
+kneeJoint_method = 3;
 
 % [EDIT] for saving the resulting mat file
-is_saveMat = false;
+is_saveMat = true;
 
 
 
