@@ -12,11 +12,11 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
+path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT]
-dir_depthdata = 'depthdata_s4_m04_20250708-172830';      % with-nav
-% dir_depthdata = 'depthdata_s3_m02_20250722-114731';      % no-nav, manual
+% dir_depthdata = 'depthdata_s4_m04_20250708-172830';      % with-nav
+dir_depthdata = 'depthdata_s3_m02_20250722-114731';      % no-nav, manual
 % dir_depthdata = 'depthdata_s3_m02_20250722-174503';      % no-nav, auto, 2x noise
 % dir_depthdata = 'depthdata_s3_m02_20250722-174812';      % no-nav, auto, 3x noise
 % dir_depthdata = 'depthdata_s3_m02_20250722-180349';      % no-nav, auto, 4x noise
@@ -26,20 +26,20 @@ idx_bone = 2;
 idx_pin  = 1;
 
 % [EDIT]
-is_displayRegProcess = true;
-is_saveMat = false;
+is_displayRegProcess = false;
+is_saveMat = true;
 
 % [EDIT] Everything related to PICP
 % path
-path_picp    = "D:\Documents\MATLAB\icp_with_pertubation";
+path_picp    = "D:\DennisChristie\SwarmPerturbation-ICP";
 % parameters
 params_picp.name               = 'tibia';
-params_picp.max_iters          = 20;
+params_picp.max_iters          = 10;
 params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 64;
+params_picp.n_candidate        = 32;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
@@ -180,9 +180,9 @@ timestamp_ms_valid   = all_amode3d_table.Timestamp_ms;
 n_timestamp_valid    = length(timestamp_idcs_valid);
 
 % Dummy for debugging purposes only
-n_timestamp_valid = 1160;
-timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
-timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
+% n_timestamp_valid = 1160;
+% timestamp_idcs_valid = timestamp_idcs_valid(1:n_timestamp_valid);
+% timestamp_ms_valid   = timestamp_ms_valid(1:n_timestamp_valid);
 
 % allocate memory for storing all registration transformation. Later we
 % will put them into one single table

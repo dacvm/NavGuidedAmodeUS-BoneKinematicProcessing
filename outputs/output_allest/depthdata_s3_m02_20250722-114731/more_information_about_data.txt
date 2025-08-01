@@ -3,3 +3,15 @@ Wednesday 23-06-205
 - Register 1200 timestamp
 - With kalman filter (Rm=1, Q=123)
 - SwarmPerturbation-ICP 64 instances
+
+Someday 24th June, 2025
+- Added Tdata_s3_m02_20250724-030951
+- Register 1610 timestamp
+- With kalman filter (Rm=1, Q=123)
+- SwarmPerturbation-ICP 64 instances
+
+Friday 1st August, 2025
+- Added Tdata_s3_m02_20250801-130011
+- Register all of the timestamp available
+- With kalman filter (Rm=1.5, 2; Q=123)
+- SwarmPerturbation-ICP 64 instances
