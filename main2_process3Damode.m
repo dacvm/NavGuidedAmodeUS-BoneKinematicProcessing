@@ -16,7 +16,7 @@ dir_trial    = "trial_0023_Session4_04";
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
 
 % [EDIT] Make sure you are using the correct depth data
-dir_depthdata = 'depthdata_s4_m04_20250714-112513';     % with-nav
+dir_depthdata = 'depthdata_s4_m04_20250708-172830';     % with-nav
 % dir_depthdata = 'depthdata_s3_m02_20250722-114731';     % no-nav, manual
 % dir_depthdata = 'depthdata_s3_m02_20250722-174503';     % no-nav, tresh 2x normalized noise
 % dir_depthdata = 'depthdata_s3_m02_20250722-174812';     % no-nav, tresh 3x normalized noise
@@ -30,7 +30,7 @@ idx_bone = 2;
 idx_pin  = 1;
 
 % [EDIT]
-is_display = false;
+is_display = true;
 is_saveMat = false;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -231,7 +231,7 @@ for idx_t = timestamp_idcs_valid
     if(is_display)
         display_axis(ax1, T_pin_ref(1:3, 4), T_pin_ref(1:3, 1:3), 30, 'T_pin_ref', 'Tag', 'cs_bonepin');
         display_axis(ax1, T_boneGT_ref(1:3, 4), T_boneGT_ref(1:3, 1:3), 30, 'T_boneGT_ref', 'Tag', 'cs_bonegt');
-        trisurf(boneCTtri_GT, 'FaceColor', '#bdc3c7', 'FaceAlpha', 0.15, 'EdgeColor', 'k', 'EdgeAlpha', 0.1, 'Tag', 'bonesurface_ct');
+        % trisurf(boneCTtri_GT, 'FaceColor', '#bdc3c7', 'FaceAlpha', 0.15, 'EdgeColor', 'k', 'EdgeAlpha', 0.1, 'Tag', 'bonesurface_ct');
     end
 
     % Preparing vars

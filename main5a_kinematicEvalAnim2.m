@@ -1,17 +1,20 @@
 %% HELOOOOOO
-% - Before running this script, you must already generated .mat file called
-%   "all_kneeJoint6DOFs_sX_mXX.mat". This .mat file contains transformations 
-%   of the bones (femur and tibia) relative to the ref (global) both GT 
-%   and est.
-% - This script will produce 6 plots, each plot for each individual degree
-%   of freedom of knee joint kinematic estimation against its ground truth
-% - Note, that the calculation of joint knee kinematic is defined 
-%   in main4_kinematicEstimation.m
-% - There are two options to show the plot: all continuous cycle shown at
-%   once, or cycles are chopped and each chop shown overalayed to each
-%   other together with their mean.
+% - Before running this script, you must already generated .mat files:
+%   1) all_kneeJoint6DOFs_sX_mXX.mat
+%      - Contains transformations of the bones (femur and tibia) relative to 
+%        the ref (global), and the 6Dof of knee joint kinematic. 
+%      - Generated from main4_kinematicEstimation3_TFJointRUMC.m
+%   2) cycle_timestamp_sX_mXX.csv
+%      - Contains the timestamps of the cycle. 
+%       - Generated from extra_detectFErotCycle.m
+% - This script will produce 9 plots: 3 plots of the view of the knee
+%   (sagital plane, frontal plane, and transverse plane), 6 plots for each 
+%   individual degree of freedom of knee joint kinematic estimation against 
+%   its ground truth.
+% - Different with main5a_kinematicEval2.m, this script will show the
+%   animation of the motion.
 % - If you want to generate the error relative to ground truth, cehck
-%   main5a_kinematicEvalAll.m
+%   main5a_kinematicEvalAll2.m
 
 clc; clear; close all;
 
@@ -36,6 +39,7 @@ color_scheme = 2;
 
 % [EDIT] for saving the resulting mat file
 is_saveMat = false;
+is_saveVid = false;
 
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -74,11 +78,9 @@ cycle_timestamp = readmatrix(csv_fullpath);
 % 3) Load all the data related to CT
 run('extra_structCTdata.m');
 
-% 4) Create base rotation to trasnform qualisys base vector to matlab
-% -- Qualisys has y direction as up, MATLAB has z direction as up
-R_tmp = eul2rotm([0 0 pi/2], "ZYX");
-t_tmp = [0 0 0]';
-baseRotation_Qualisys2Matlab = [R_tmp, t_tmp; 0 0 0 1];
+% 4) Create and configure a VideoWriter object
+vid_filename = sprintf('video_kneeJoint6DOFs_%s_%s.mp4', sess_str, meas_str);
+vid_fullpath = fullfile(path_outputs, 'output_allest', dirs_Tdata{idx_dir_Tdata}, vid_filename);
 
 %% INITIALIZE FIGURE OBJECTS AND EVERYTHING RELATED TO PLOTS
 
@@ -200,7 +202,12 @@ for idx_dof = 1:6
     % ylim( ax1(idx_dof), ax_ylim(idx_dof,:) );
 end
 
-
+if (is_saveVid)
+    v = VideoWriter(vid_fullpath, 'MPEG-4');  
+    v.FrameRate = 30;          % frames per second
+    v.Quality   = 100;          % 0–100 (optional)
+    open(v);
+end
 
 %% MAIN PROGRAM
 
@@ -448,7 +455,18 @@ for idx_t = cycle_idxvalid_select(1):cycle_idxvalid_select(2)
 
     end
 
-
+    % force the graphics update
     drawnow;
 
+    % capture the entire figure window and write to video object
+    if(is_saveVid)
+        frame = getframe(gcf);
+        writeVideo(v, frame);
+    end
+
+end
+
+% close the video object to flush the file.
+if(is_saveVid)
+    close(v);
 end

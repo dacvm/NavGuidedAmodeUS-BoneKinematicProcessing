@@ -1,17 +1,20 @@
 %% HELOOOOOO
-% - Before running this script, you must already generated .mat file called
-%   "all_kneeJoint6DOFs_sX_mXX.mat". This .mat file contains transformations 
-%   of the bones (femur and tibia) relative to the ref (global) both GT 
-%   and est.
+% - Before running this script, you must already generated .mat files:
+%   1) all_kneeJoint6DOFs_sX_mXX.mat
+%      - Contains transformations of the bones (femur and tibia) relative to 
+%        the ref (global), and the 6Dof of knee joint kinematic. 
+%      - Generated from main4_kinematicEstimation3_TFJointRUMC.m
+%   2) cycle_timestamp_sX_mXX.csv
+%      - Contains the timestamps of the cycle. 
+%       - Generated from extra_detectFErotCycle.m
 % - This script will produce 6 plots, each plot for each individual degree
 %   of freedom of knee joint kinematic estimation against its ground truth
-% - Note, that the calculation of joint knee kinematic is defined 
-%   in main4_kinematicEstimation.m
-% - There are two options to show the plot: all continuous cycle shown at
-%   once, or cycles are chopped and each chop shown overalayed to each
+% - There are two options to show the plot: 
+%   1) all continuous cycle shown at once, 
+%   2) Cycles are chopped and each chop will be shown overalayed to each
 %   other together with their mean.
-% - If you want to generate the error relative to ground truth, cehck
-%   main5a_kinematicEvalAll.m
+% - If you want to generate the error relative to ground truth, check
+%   main5a_kinematicEvalAll2.m
 
 clc; clear; close all;
 

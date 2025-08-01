@@ -12,7 +12,7 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
+path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] Change the data you are using accordingly. 
 % ------ dir_depthdata is created by main1_processDepthData.m
@@ -28,12 +28,12 @@ idx_dir_Tdata = 1;
 idcs_pin = [1, 1];
 
 % [EDIT] For displaying [amode3d, tibiaest, femur and tibiagt]
-is_display.amode3d  = false;
-is_display.tibiaest = false;
-is_display.bonegt   = [false, false];
+is_display.amode3d  = true;
+is_display.tibiaest = true;
+is_display.bonegt   = [true, true];
 
 % [EDIT] method for calculation
-kneeJoint_method = 3;
+kneeJoint_method = 1;
 
 % [EDIT] for saving the resulting mat file
 is_saveMat = false;

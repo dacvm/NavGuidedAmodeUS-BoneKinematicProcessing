@@ -1,7 +1,16 @@
 %% HELOOOOOO
-% - Before running this script, you must already generated .mat file called
-%   "all_TsReg_sX_mXX.mat". This .mat file contains transformations of the
-%   bone (tibia) relative to the ref (global) both GT and est.
+% - Before running this script, you must already generated .mat files:
+%   1) all_TsReg_sX_mXX.mat
+%      - Contains transformations of the bone (tibia) relative to the ref 
+%        (global) both GT and est.
+%      - Generated from main3_registrationWithTime_4clean.m
+%   2) all_kneeJoint6DOFs_sX_mXX.mat
+%      - Contains transformations of the bones (femur and tibia) relative to 
+%        the ref (global), and the 6Dof of knee joint kinematic. 
+%      - Generated from main4_kinematicEstimation3_TFJointRUMC.m
+%   3) cycle_timestamp_sX_mXX.csv
+%      - Contains the timestamps of the cycle. 
+%       - Generated from extra_detectFErotCycle.m
 % - The purpose of this script is to quantify and evaluate the 3d pose 
 %   estimation against the ground truth.
 % - main5b_registrationEval2 will show multiple registration errors from
@@ -286,21 +295,26 @@ for idx_metric=1:2
     
     end
 
-% Adjust the x-axis of the plot. 
-% -> I should have done this when i plot the lines in the plotColoredTrace 
-%    function. But it was quite complicated because i plot it 2-lines at a 
-%    time (to support colour). 
-% -> So better i arrange the x-axis here instead of there. 
-% -> Here, I am create my own x-tick according the timestamp_ms values
-tmp_end    = round(selTime_ms_valid_valuestretched(end) - selTime_ms_valid_valuestretched(1));
-tmp_tick   = round(tmp_end / (length(ax1{idx_metric}.XTick)+1));
+    % (Here, I should add legend. But I can't. The way i form the colored
+    % line is by creating hundreds of line with different color. Legend 
+    % will only show some of them. My solution is, leave it like this, you
+    % can later edit the figure yourself with Adobe Illustrator)
 
-% Create the xtick
-tmp_xticks = 0:tmp_tick:tmp_end;       % [ms]
-tmp_xticks = round(tmp_xticks/ 1000);  % [s]
-
-% Replace the xtick string/label
-ax1{idx_metric}.XTickLabel = tmp_xticks(2:end);
+    % Adjust the x-axis of the plot. 
+    % -> I should have done this when i plot the lines in the plotColoredTrace 
+    %    function. But it was quite complicated because i plot it 2-lines at a 
+    %    time (to support colour). 
+    % -> So better i arrange the x-axis here instead of there. 
+    % -> Here, I am create my own x-tick according the timestamp_ms values
+    tmp_end    = round(selTime_ms_valid_valuestretched(end) - selTime_ms_valid_valuestretched(1));
+    tmp_tick   = round(tmp_end / (length(ax1{idx_metric}.XTick)+1));
+    
+    % Create the xtick
+    tmp_xticks = 0:tmp_tick:tmp_end;       % [ms]
+    tmp_xticks = round(tmp_xticks/ 1000);  % [s]
+    
+    % Replace the xtick string/label
+    ax1{idx_metric}.XTickLabel = tmp_xticks(2:end);
 
 % bye-bye, it works, i don't care.
 end

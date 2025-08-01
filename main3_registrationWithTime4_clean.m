@@ -26,7 +26,7 @@ idx_bone = 2;
 idx_pin  = 1;
 
 % [EDIT]
-is_displayRegProcess = false;
+is_displayRegProcess = true;
 is_saveMat = false;
 
 % [EDIT] Everything related to PICP
@@ -362,8 +362,8 @@ for idx_t_3damode = 1:n_timestamp_valid
         trisurf(current_boneCTtri_est, 'FaceColor', '#2ecc71', 'FaceAlpha', 0.15, 'EdgeColor', '#2ecc71', 'EdgeAlpha', 0.1, 'Parent', ax1, 'Tag', '3d_bone_est')
 
         % Display the GT bone
-        display_axis(ax1, T_boneGT_ref(1:3, 4), T_boneGT_ref(1:3, 1:3), 30, 'T_boneGT_ref', 'Tag', 'cs_bone_gt');
-        trisurf(current_boneCTtri_GT, 'FaceColor', '#bdc3c7', 'FaceAlpha', 0.15, 'EdgeColor', 'k', 'EdgeAlpha', 0.1, 'Parent', ax1, 'Tag', '3d_bone_est');
+        % display_axis(ax1, T_boneGT_ref(1:3, 4), T_boneGT_ref(1:3, 1:3), 30, 'T_boneGT_ref', 'Tag', 'cs_bone_gt');
+        % trisurf(current_boneCTtri_GT, 'FaceColor', '#bdc3c7', 'FaceAlpha', 0.15, 'EdgeColor', 'k', 'EdgeAlpha', 0.1, 'Parent', ax1, 'Tag', '3d_bone_est');
 
         % draw to the plot
         drawnow;

@@ -1,3 +1,20 @@
+%% HELOOOOOO
+% - Before running this script, you must already generated .mat files:
+%   1) all_kneeJoint6DOFs_sX_mXX.mat
+%      - Contains transformations of the bones (femur and tibia) relative to 
+%        the ref (global), and the 6Dof of knee joint kinematic. 
+%      - Generated from main4_kinematicEstimation3_TFJointRUMC.m
+%   2) cycle_timestamp_sX_mXX.csv
+%      - Contains the timestamps of the cycle. 
+%       - Generated from extra_detectFErotCycle.m
+% - The purpose of this script is to quantify the joint knee kinematic 
+%   estimation against ground truth.
+% - Different with main5a_kinematicEval2.m, this script can show multiple
+%   method at once. However, since different method has different
+%   groundtruth, this script will only plot the difference between the
+%   estimation relative to its groundtruth (the ground truth will be zero), 
+%   so, not the actual numbers of estimation.
+
 clc; clear; close all;
 
 % [EDIT] directory to the project
