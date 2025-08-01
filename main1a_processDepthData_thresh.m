@@ -27,7 +27,7 @@ is_withIntermediate = false;
 % [EDIT] 
 is_saveMat_ustreqdata  = false;
 is_saveMat_ustprocdata = false;
-is_saveMat_final       = true;
+is_saveMat_final       = false;
 
 % [EDIT]
 is_loadCyclicData = false;
@@ -199,13 +199,13 @@ ust_numbers = zeros(1, n_ust_selected);
 %%
 
 % set these thresholds to the number of the n_ust_selected pwease.....
-noise_constant = 4;
+noise_constant = 2;
 noise_weight   = [1 1 1 1 1 1 1 1 1 1 1 1 1];
 tresh_allconstants = noise_constant * noise_weight;
 
 % Process and display m-mode image for all selected ust
-for ust_idx=1:n_ust_selected
-% for ust_idx=1
+% for ust_idx=1:n_ust_selected
+for ust_idx=3
 
     % [1] -----------------------------------------------------------------
     % Get the current ust number
@@ -347,6 +347,8 @@ for ust_idx=1:n_ust_selected
 
 % end of ust_idx loop    
 end
+
+return;
 
 % initialize a table
 ust_cell     = arrayfun(@num2str, ust_numbers, 'UniformOutput', false);
