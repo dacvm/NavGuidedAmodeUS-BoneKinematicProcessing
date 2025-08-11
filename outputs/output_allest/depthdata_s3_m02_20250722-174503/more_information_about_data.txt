@@ -1,5 +1,13 @@
-Wednesday 23-06-205
-- Added Tdata_s3_m02_20250723-165800
-- Register 1200 timestamp
-- With kalman filter (Rm=1, Q=123)
-- SwarmPerturbation-ICP 128 instances
+Some day, 24th August, 2025 (last accepted behavior before full timestamp)
+- Added Tdata_s3_m02_20250724-012236 and Tdata_s3_m02_20250724-032542
+- Register with 1610 timestamp
+- In all honesty, i forgot the registration parameter. 
+- But i think it is the same kalman params as everywhere but with SwarmPerturbation-ICP 64 instance 
+  But for sure, the more recent one is the one that is "more valid"
+  You know what i meant.
+
+Friday, 7th August, 2025 (during my holiday)
+- Added Tdata_s3_m02_20250807-215603
+- Register all of the timestamp available
+- With kalman filter (Rm=1.5, 2; Q=123)
+- SwarmPerturbation-ICP 64 instance

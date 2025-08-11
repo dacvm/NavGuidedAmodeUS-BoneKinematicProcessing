@@ -1,0 +1,17 @@
+Some day, 24th July, 2025 (last accepted behavior before full timestamp)
+- Added Tdata_s4_m04_20250724-100122
+- Register with 1300 (or something) timestamps.
+- With kalman filter (Rm=1.5, 2; Q=123)
+- SwarmPerturbation-ICP 64 instances, 20 iterations
+
+Some day, 24th July, 2025 (similar to above, bigger params, untested)
+- Added Tdata_s4_m04_20250724-171827
+- Register with 1300 (or something) timestamps.
+- With kalman filter (Rm=1.5, 2; Q=123)
+- SwarmPerturbation-ICP 256 instances, 30 iterations
+
+Friday, 8th August, 2025 (during my holiday)
+- Added Tdata_s4_m04_20250808-212946
+- Register all of the timestamp available
+- With kalman filter (Rm=1.5, 2; Q=123)
+- SwarmPerturbation-ICP 256 instances, 40 iterations

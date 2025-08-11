@@ -16,9 +16,9 @@ path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT]
 % dir_depthdata = 'depthdata_s4_m04_20250708-172830';      % with-nav
-dir_depthdata = 'depthdata_s3_m02_20250722-114731';      % no-nav, manual
+% dir_depthdata = 'depthdata_s3_m02_20250722-114731';      % no-nav, manual
 % dir_depthdata = 'depthdata_s3_m02_20250722-174503';      % no-nav, auto, 2x noise
-% dir_depthdata = 'depthdata_s3_m02_20250722-174812';      % no-nav, auto, 3x noise
+dir_depthdata = 'depthdata_s3_m02_20250722-174812';      % no-nav, auto, 3x noise
 % dir_depthdata = 'depthdata_s3_m02_20250722-180349';      % no-nav, auto, 4x noise
 
 % [EDIT] Select bone and pin
@@ -34,12 +34,12 @@ is_saveMat = true;
 path_picp    = "D:\DennisChristie\SwarmPerturbation-ICP";
 % parameters
 params_picp.name               = 'tibia';
-params_picp.max_iters          = 10;
+params_picp.max_iters          = 20;
 params_picp.rmse_threshold     = 0.001;
 params_picp.init_perturb_rot   = 1.0;
 params_picp.init_perturb_trans = 1.0;
 params_picp.decay_rate         = 0.01;
-params_picp.n_candidate        = 32;
+params_picp.n_candidate        = 64;
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
 
