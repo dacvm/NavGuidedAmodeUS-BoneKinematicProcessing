@@ -24,15 +24,16 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % [EDIT] Change the data you are using accordingly. 
 % -----> dir_depthdata is created by main1_processDepthData.m
 % -----> dir_Tdata is created by main3_registrationWithTime.m
-dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250724-100122'), ...   % with-nav
-               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250724-030951'), ...   % no-nav, manual
-               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250724-032542')};      % no-nav, auto, 2x noise
+dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250808-212946'), ...   % with-nav
+               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-203337'), ...   % no-nav, manual
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603'), ...   % no-nav, auto, 2x noise
+               fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 % [EDIT] select which data you want to show
 idx_dir_Tdata = 1;
 
 % [EDIT] select which cycle you want to show
-cycle_select  = [2,5];
+cycle_select  = [3,12];
 
 % [EDIT]
 % do you want to split the data into cycles and average them?
@@ -139,7 +140,7 @@ end
 ax_ylim = repmat([-20, 20], 6, 1);
 
 % First figure is to show the joint kinematic with all of the cycle parts
-fig1 = figure('Name', 'Joint Kinematic: All Cycle Parts', 'Position', [50 50 700 500]);
+fig1 = figure('Name', 'Joint Kinematic: All Cycle Parts', 'Position', [50 300 1700 700]);
 t1 = tiledlayout(fig1, 2, 3, ...
      'TileSpacing', 'compact', ...   % tighten spacing if you like
      'Padding',     'compact');      % remove outer margins
