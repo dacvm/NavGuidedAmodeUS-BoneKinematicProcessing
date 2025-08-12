@@ -23,13 +23,18 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % [EDIT] Change the data you are using accordingly. 
 % -----> dir_depthdata is created by main1_processDepthData.m
 % -----> dir_Tdata is created by main3_registrationWithTime.m
-dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250724-100122'), ...   % with-nav
-               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250724-030951'), ...   % no-nav, manual
-               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250724-032542')};      % no-nav, auto, 2x noise
+dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250808-212946'), ...   % with-nav
+               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-203337'), ...   % no-nav, manual
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603'), ...   % no-nav, auto, 2x noise
+               fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 
 % [EDIT] Color scheme.
 color_scheme = 2;
+
+% [EDIT] select cycle. Be careful, some .mat files can start the valid
+% timestamps from different cycle.
+cycle_select = [3, 8];
 
 
 %% INITIALIZE FIGURE OBJECTS AND EVERYTHING RELATED TO PLOTS
@@ -154,8 +159,6 @@ end
 %   should be "stretched" (normalized) against this data.
 % - In this particular part, we will obtain the stretched timestamp in ms
 
-% select cycle
-cycle_select             = [2,5];
 % to store the max timestamps
 max_val_timestamps     = 0;
 max_idxdata_timestamps = 0;
@@ -266,7 +269,7 @@ for idx_dir=1:n_dirs_Tdata
         currentDoF_kneeJoint_estgtdiff_valuestretched = imresize(currentDoF_kneeJoint_estgtdiff, [max_val_timestamps 1], 'bicubic');
     
         % 5) Plot the knee joint for the current dof
-        plot(ax1(idx_dof), timestamp_ms_valid_select0_valuestretched * 1e-3, currentDoF_kneeJoint_estgtdiff_valuestretched, '-', 'Color', c(idx_dir+1, :), 'LineWidth', 3);
+        plot(ax1(idx_dof), timestamp_ms_valid_select0_valuestretched * 1e-3, currentDoF_kneeJoint_estgtdiff_valuestretched, '-', 'Color', c(idx_dir+1, :), 'LineWidth', 2);
     
         % 6) Compute the quantitative result
         result_corr  = corr(currentDoF_kneeJoint_est, currentDoF_kneeJoint_gt);
@@ -306,7 +309,7 @@ end
 for idx_dof = 1:6
     title(ax1(idx_dof), ax_title{idx_dof});
     plot(ax1(idx_dof), timestamp_ms_valid_select0_valuestretched * 1e-3, zeros(length(currentDoF_kneeJoint_estgtdiff_valuestretched), 1), '-', 'Color', 'b', 'LineWidth', 3);
-    legend(ax1(idx_dof), {'with-nav', 'no-nav, manual', 'no-nav, 2x-noise', 'Ground truth'});
+    legend(ax1(idx_dof), {'with-nav', 'no-nav, manual', 'no-nav, 2x-noise', 'no-nav, 3x-noise', 'Ground truth'});
 end
 
 

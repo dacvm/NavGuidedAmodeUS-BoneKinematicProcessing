@@ -24,16 +24,16 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % [EDIT] Change the data you are using accordingly. 
 % -----> dir_depthdata is created by main1_processDepthData.m
 % -----> dir_Tdata is created by main3_registrationWithTime.m
-dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250724-100122'), ...   % with-nav
-               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250724-030951'), ...   % no-nav, manual
-               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-131010'), ...   % no-nav, manual, fulltimestamp
-               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250724-032542')};      % no-nav, auto, 2x noise
+dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250808-212946'), ...   % with-nav
+               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-203337'), ...   % no-nav, manual
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603'), ...   % no-nav, auto, 2x noise
+               fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 % [EDIT] select which data you want to show
-idx_dir_Tdata = 3;
+idx_dir_Tdata = 1;
 
 % [EDIT] select which cycle you want to show
-cycle_select  = [2, 7; 8, 14];
+cycle_select  = [3, 6; 9, 12];
 
 % [EDIT]
 % do you want to split the data into cycles and average them?
@@ -140,7 +140,7 @@ end
 ax_ylim = repmat([-20, 20], 6, 1);
 
 % First figure is to show the joint kinematic with all of the cycle parts
-fig1 = figure('Name', 'Joint Kinematic: All Cycle Parts', 'Position', [50 50 700 500]);
+fig1 = figure('Name', 'Joint Kinematic: All Cycle Parts', 'Position', [50 300 1700 700]);
 t1 = tiledlayout(fig1, 2, 3, ...
      'TileSpacing', 'compact', ...   % tighten spacing if you like
      'Padding',     'compact');      % remove outer margins
@@ -219,6 +219,15 @@ tmp2 = find(timestamp_idcs_valid==cycle_idxoriginal_select(2));
 cycle_idxvalid_select_part2 = [tmp1, tmp2];
 
 
+% To store the metric evaluation values.
+% rows will be organized as: tx, ty, tz, rx, ry, rz 
+% (be aware, i choose xyz here, easier for reader to understand, 
+% instead of the default format, zyx, from matlab)
+% cols will be organized as: rmse, std, mad, uw, corr
+metric_mat_part1 = zeros(6, 5);
+metric_mat_part2 = zeros(6, 5);
+pvalues_rmse     = zeros(6, 2);
+pvalues_mad      = zeros(6, 2);
 
 % loop for all dofs, let's display them one by one
 for idx_dof=1:6
@@ -235,6 +244,18 @@ for idx_dof=1:6
         % 1.3) Get the selected timestamp_ms
         timestamp_ms_valid_select_part1  = timestamp_ms_valid(cycle_idxvalid_select_part1(1):cycle_idxvalid_select_part1(2));
         timestamp_ms_valid_select0_part1 = timestamp_ms_valid_select_part1 - cycle_idxvalid_select_part1(1);
+        
+        % 1.4) Compute quantitative result
+        currentDoF_kneeJoint_estgt_diff1   = currentDoF_kneeJoint_est_part1 - currentDoF_kneeJoint_gt_part1;
+        
+        % 1.5) Compute the quantitative result
+        result_corr_1  = corr(currentDoF_kneeJoint_est_part1, currentDoF_kneeJoint_gt_part1);
+        result_rmse_1  = sqrt( mean( (currentDoF_kneeJoint_estgt_diff1).^2 ) );
+        result_std_1   = std(currentDoF_kneeJoint_estgt_diff1);
+        [~, ~, ~, result_q2_1, ~, result_uw_1, ~] = computeBoxplotStats(abs(currentDoF_kneeJoint_estgt_diff1));
+
+        % 1.6) Store the value
+        metric_mat_part1(idx_dof, :) = [result_rmse_1, result_std_1, result_q2_1, result_uw_1, result_corr_1]';
 
 
         % 2) Get the part 2 -----------------------------------------------
@@ -249,10 +270,22 @@ for idx_dof=1:6
         timestamp_ms_valid_select_part2  = timestamp_ms_valid(cycle_idxvalid_select_part2(1):cycle_idxvalid_select_part2(2));
         timestamp_ms_valid_select0_part2 = timestamp_ms_valid_select_part2 - cycle_idxvalid_select_part1(1);
 
+        % 2.4) Calculate the difference
+        currentDoF_kneeJoint_estgt_diff2   = currentDoF_kneeJoint_est_part2 - currentDoF_kneeJoint_gt_part2;
+
+        % 2.5) Compute the quantitative result
+        result_corr_2  = corr(currentDoF_kneeJoint_est_part2, currentDoF_kneeJoint_gt_part2);
+        result_rmse_2  = sqrt( mean( (currentDoF_kneeJoint_estgt_diff2).^2 ) );
+        result_std_2   = std(currentDoF_kneeJoint_estgt_diff2);
+        [~, ~, ~, result_q2_2, ~, result_uw_2, ~] = computeBoxplotStats(abs(currentDoF_kneeJoint_estgt_diff2));
+
+        % 2.6) Store the value
+        metric_mat_part2(idx_dof, :) = [result_rmse_2, result_std_2, result_q2_2, result_uw_2, result_corr_2]';
+
 
         % 3) Display ------------------------------------------------------
 
-        % 3.1) Display part 1
+        % 3.1a) Display part 1
         plotDiscontinuousXAxis( ax1(idx_dof), ...
                                    timestamp_ms_valid_select0_part1*1e-3, currentDoF_kneeJoint_est_part1, ...
                                    timestamp_ms_valid_select0_part2*1e-3, currentDoF_kneeJoint_est_part2, ...
@@ -263,7 +296,19 @@ for idx_dof=1:6
                                    'LineStyle', '-', ...
                                    'ShadeAlpha', 0.05);
 
-        % 3.1) Display part 2
+        % 3.1b) Display the statistics
+        str = sprintf('corr   = %.2f\nrmse = %.2f %s %.2f\nmad  = %.2f%s%.2f', result_corr_1, result_rmse_1, char(177), result_std_1, result_q2_1, char(9652), result_uw_1);
+        text( ax1(idx_dof), ...
+              0.05, 0.95, ... 
+              str, ...
+              'Units',            'normalized', ...
+              'VerticalAlignment','top', ...
+              'FontSize',         10, ...
+              'BackgroundColor',  'w', ...
+              'EdgeColor',        'k', ...
+              'Margin',           5 );
+
+        % 3.2b) Display part 2
         plotDiscontinuousXAxis( ax1(idx_dof), ...
                                    timestamp_ms_valid_select0_part1*1e-3, currentDoF_kneeJoint_gt_part1, ...
                                    timestamp_ms_valid_select0_part2*1e-3, currentDoF_kneeJoint_gt_part2, ...
@@ -273,6 +318,20 @@ for idx_dof=1:6
                                    'Color', [0 0 1], ...
                                    'LineStyle', '-', ...
                                    'ShadeAlpha', 0.05);
+
+        % 3.2b) Display the statistics
+        str = sprintf('corr   = %.2f\nrmse = %.2f %s %.2f\nmad  = %.2f%s%.2f', result_corr_2, result_rmse_2, char(177), result_std_2, result_q2_2, char(9652), result_uw_2);
+        text( ax1(idx_dof), ...
+              0.95, 0.95, ... 
+              str, ...
+              'Units',               'normalized', ...
+              'VerticalAlignment',   'top', ...
+              'HorizontalAlignment', 'right', ...
+              'FontSize',            10, ...
+              'BackgroundColor',     'w', ...
+              'EdgeColor',           'k', ...
+              'Margin',              5 );
+        
 
         % 3.2) Adjust the ylim again
         ylim(ax1(idx_dof), [min([currentDoF_kneeJoint_est_part1; ...
@@ -284,7 +343,43 @@ for idx_dof=1:6
                                  currentDoF_kneeJoint_gt_part1; ...
                                  currentDoF_kneeJoint_gt_part2])]);
 
+
+        % 4) Extra --------------------------------------------------------
+
+        [h, p] = ttest2(currentDoF_kneeJoint_estgt_diff1, currentDoF_kneeJoint_estgt_diff2, 'Vartype','unequal');
+        pvalues_rmse(idx_dof, :) = [h, p];
+
+        [p, h] = ranksum(abs(currentDoF_kneeJoint_estgt_diff1), abs(currentDoF_kneeJoint_estgt_diff2));
+        pvalues_mad(idx_dof, :) = [h, p];
+
 end
 
 
+% 4) Swap row-4 and row-6, from r-zyx to r-xyz
+tmp = metric_mat_part1(4, :);
+metric_mat_part1(4, :) = metric_mat_part1(6, :);
+metric_mat_part1(6, :) = tmp;
 
+% 5) Create a table. You can just open the table and copy paste to excel 
+% or latex table generator.
+metric_table_part1 = array2table( metric_mat_part1,  'VariableNames', ...
+                                  {'rmse_mean', 'rmse_std', 'mad_q2', 'mad_uw', 'corr'});
+
+% Repeat 4, for part 2
+tmp = metric_mat_part2(4, :);
+metric_mat_part2(4, :) = metric_mat_part2(6, :);
+metric_mat_part2(6, :) = tmp;
+
+% Repeat 5, for part 2
+metric_table_part2 = array2table( metric_mat_part2,  'VariableNames', ...
+                                  {'rmse_mean', 'rmse_std', 'mad_q2', 'mad_uw', 'corr'});
+
+% Repeat 4 for pvalues_rmse
+tmp = pvalues_rmse(4, :);
+pvalues_rmse(4, :) = pvalues_rmse(6, :);
+pvalues_rmse(6, :) = tmp;
+
+% Repeat 4 for pvalues_mad
+tmp = pvalues_mad(4, :);
+pvalues_mad(4, :) = pvalues_mad(6, :);
+pvalues_mad(6, :) = tmp;

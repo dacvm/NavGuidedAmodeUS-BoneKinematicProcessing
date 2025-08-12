@@ -17,13 +17,13 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % [EDIT] Change the data you are using accordingly. 
 % ------ dir_depthdata is created by main1_processDepthData.m
 % ------ dir_Tdata is created by main3_registrationWithTime.m
-dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250724-100122'), ...   % with-nav
-               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250724-030951'), ...   % no-nav, manual
-               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-131010'), ...   % no-nav, manual, fulltimestamp
-               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250724-032542')};      % no-nav, auto, 2x noise
+dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250808-212946'), ...   % with-nav
+               fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-203337'), ...   % no-nav, manual
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603'), ...   % no-nav, auto, 2x noise
+               fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 % [EDIT] select which data you want to show
-idx_dir_Tdata = 3;
+idx_dir_Tdata = 4;
 
 % [EDIT] Change this to select the pin [femur, tibia], 1 -> PRO, 2-> DIS
 idcs_pin = [1, 1];
@@ -292,12 +292,15 @@ for idx_t_3damode = 1:n_timestamp_valid
         r_est = rad2deg(r_est);
         r_gt = rad2deg(r_gt);
 
-    % The function below, i got from Miriam (ORL, RadboudUMC). They usually
-    % construct the R matrix by stacking the basis vector of the ACS
-    % row-wise (which is actually not standard, it should be column-wise).
-    % Consequently the function below also requires the similar structure. 
-    % Since i use the column-wise R, before i feed to this function i need
-    % to transpose it first.
+    % [!] DEPRECATED. There is a new implementation from ORL, RadboudUMC,
+    %     (see kneeJoint_method==4 below).
+    %  -> However, i keep this one here to be consistent with our past data.
+    %  -> The function below, i got from Miriam (ORL, RadboudUMC). They usually
+    %     construct the R matrix by stacking the basis vector of the ACS
+    %     row-wise (which is actually not standard, it should be column-wise).
+    %  -> Consequently the function below also requires the similar structure. 
+    %  -> Since i use the column-wise R, before i feed to this function i need
+    %     to transpose it first.
     elseif(kneeJoint_method==2)
         T_femurGT_ref = Ts_femurGT_ref{idx_t_3damode};
         r_est = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_boneEst_ref(1:3, 1:3)', 'right');
@@ -327,6 +330,11 @@ for idx_t_3damode = 1:n_timestamp_valid
         T_tibiaGT_femurGT = inv(T_femurGT_ref) * T_tibiaGT_ref;
         r_gt = rad2deg(rotm2eul(T_tibiaGT_femurGT(1:3, 1:3), 'ZYX'));
         t_gt = T_tibiaGT_femurGT(1:3, 4)';
+
+    % New implementation from ORL after i found a certain weirdness from
+    % their function.
+    elseif(kneeJoint_method==4)
+        
     end
 
     %  Store the GT
