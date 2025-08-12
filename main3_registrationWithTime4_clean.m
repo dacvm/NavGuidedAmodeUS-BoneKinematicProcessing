@@ -18,8 +18,8 @@ path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 % dir_depthdata = 'depthdata_s4_m04_20250708-172830';      % with-nav
 % dir_depthdata = 'depthdata_s3_m02_20250722-114731';      % no-nav, manual
 % dir_depthdata = 'depthdata_s3_m02_20250722-174503';      % no-nav, auto, 2x noise
-dir_depthdata = 'depthdata_s3_m02_20250722-174812';      % no-nav, auto, 3x noise
-% dir_depthdata = 'depthdata_s3_m02_20250722-180349';      % no-nav, auto, 4x noise
+% dir_depthdata = 'depthdata_s3_m02_20250722-174812';      % no-nav, auto, 3x noise
+dir_depthdata = 'depthdata_s3_m02_20250722-180349';      % no-nav, auto, 4x noise
 
 % [EDIT] Select bone and pin
 idx_bone = 2;
