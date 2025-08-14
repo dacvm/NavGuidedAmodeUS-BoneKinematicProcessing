@@ -9,16 +9,21 @@ clc; clear; close all;
 path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
+% dir_trial    = "trial_0023_Session4_04";
 
 % [EDIT] window configuration file
-csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-07-03_15-43-26.csv';
+csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-19_11-29-46_edited2025-07-22_10-31-50';
+% csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-07-03_15-43-26';
 
 % [EDIT] holder configuration file
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
 
 % [EDIT] Specify folder index
 folder_idx = 1;
+
+% [EDIT] Select the UST
+ust_numbers = 14:26;
 
 % [EDIT] Specify if you want to load the intermediate data too alongside
 %        the measurement data
@@ -82,8 +87,15 @@ load(mat_fullpath);
 ust_dataspec.n_ust    = length(ust_windowconfig);
 ust_dataspec.n_sample = 3500;
 
-% select probes that has window defined
-ust_config_selected = ust_windowconfig([ust_windowconfig.IsSet] == 1);
+% Select probes that has window defined
+% % The block below is the ideal one, selecting the ust based on the field
+% % called .IsSet, which defined true/false when we do the experiment.
+% ust_config_selected = ust_windowconfig([ust_windowconfig.IsSet] == 1);
+% n_ust_selected      = length(ust_config_selected);
+% But i will use this block, because in Session 3 (without navigation) we
+% use full femur and tibia while in Session 4 (with navigation) we only use
+% tibia. Devils in the detail, but we decided to only use tibia
+ust_config_selected = ust_windowconfig(14:26);
 n_ust_selected      = length(ust_config_selected);
 
 % declare the ultrasound spesification

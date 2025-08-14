@@ -8,7 +8,7 @@
 clc; clear; close all;
 
 % [EDIT] directory to the project
-path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
+path_root    = 'D:\DennisChristie\NavGuidedAmodeUS-BoneKinematicProcessing';
 
 % [EDIT] directory to the trial
 dir_trial    = "trial_0011_Session3_02";
@@ -448,7 +448,7 @@ all_depthgtstd_table    = array2table([ust_timestampidx_vector', all_depthgtstd_
 % save the data
 if(is_saveMat)
     % save
-    mat_filename = sprintf('all_depthest_s%s_m%s.mat', sess_str(end), meas_str);
+    mat_filename = sprintf('all_depthgt_s%s_m%s.mat', sess_str(end), meas_str);
     mat_fullpath = fullfile(path_outputs, 'output_allgtdepths', mat_filename);
     save(mat_fullpath, 'all_depthgtmean_table', 'all_depthgtstd_table');
 end
