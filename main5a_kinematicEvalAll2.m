@@ -25,8 +25,8 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % -----> dir_Tdata is created by main3_registrationWithTime.m
 dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250808-212946'), ...   % with-nav
                fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-203337'), ...   % no-nav, manual
-               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603'), ...   % no-nav, auto, 2x noise
-               fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603')}; ...   % no-nav, auto, 2x noise
+               % fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 
 % [EDIT] Color scheme.
@@ -34,7 +34,7 @@ color_scheme = 2;
 
 % [EDIT] select cycle. Be careful, some .mat files can start the valid
 % timestamps from different cycle.
-cycle_select = [3, 8];
+cycle_select = [3, 12];
 
 
 %% INITIALIZE FIGURE OBJECTS AND EVERYTHING RELATED TO PLOTS
@@ -72,7 +72,7 @@ end
 
 
 % First figure is to show the joint kinematic with all of the cycle parts
-fig1 = figure('Name', 'Joint Kinematic: Relative to Ground Truth', 'Position', [50 50 700 500]);
+fig1 = figure('Name', 'Joint Kinematic: Relative to Ground Truth', 'Position', [50 300 2000 800]);
 t1 = tiledlayout(fig1, 2, 3, ...
      'TileSpacing', 'compact', ...   % tighten spacing if you like
      'Padding',     'compact');      % remove outer margins
@@ -299,9 +299,9 @@ elseif (kneeJoint_method==2)
                  'Exorotaion(+) - Endorotation(-)'};
 elseif (kneeJoint_method==3)
     ax_title = {'Anterior(+) - Posterior(-)', ... 
-                'Distraction(+) - Compression(-)', ...
+                'Proximal(+) - Distal(-)', ...
                 'Medial(+) - Lateral(-)', ...
-                'Flexion(+) - Extension(-)', ...
+                'Extension(+) - Flexion(-)', ...
                 'External(+) - Internal(-)', ...
                 'Abduction(+) - Adduction(-)', };
 end
@@ -309,7 +309,8 @@ end
 for idx_dof = 1:6
     title(ax1(idx_dof), ax_title{idx_dof});
     plot(ax1(idx_dof), timestamp_ms_valid_select0_valuestretched * 1e-3, zeros(length(currentDoF_kneeJoint_estgtdiff_valuestretched), 1), '-', 'Color', 'b', 'LineWidth', 3);
-    legend(ax1(idx_dof), {'with-nav', 'no-nav, manual', 'no-nav, 2x-noise', 'no-nav, 3x-noise', 'Ground truth'});
+    legend(ax1(idx_dof), {'with-nav', 'no-nav, manual', 'no-nav, 2x-noise', 'Ground truth'});
+    % legend(ax1(idx_dof), {'with-nav', 'no-nav, manual', 'no-nav, 2x-noise', 'no-nav, 3x-noise', 'Ground truth'});
 end
 
 

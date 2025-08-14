@@ -26,11 +26,11 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 % -----> dir_Tdata is created by main3_registrationWithTime.m
 dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_20250808-212946'), ...   % with-nav
                fullfile('depthdata_s3_m02_20250722-114731', 'Tdata_s3_m02_20250801-203337'), ...   % no-nav, manual
-               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603'), ...      % no-nav, auto, 2x noise
-               fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
+               fullfile('depthdata_s3_m02_20250722-174503', 'Tdata_s3_m02_20250807-215603')};      % no-nav, auto, 2x noise
+               % fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 % [EDIT] select which cycle you want to show
-cycle_select  = [3,12];
+cycle_select  = [3, 12];
 
 % [EDIT]
 % do you want to split the data into cycles and average them?
@@ -207,8 +207,8 @@ style(1).lineStyle = '-';
 style(2).alphaVal  = 0.6;
 style(2).lineWidth = 1.0;
 style(2).lineStyle = '--';
-style(3).alphaVal  = 0.8;
-style(3).lineWidth = 1.0;
+style(3).alphaVal  = 0.7;
+style(3).lineWidth = 0.9;
 style(3).lineStyle = ':';
 
 % There are two different registration metric, us2regbone and regbone2gtbone
@@ -337,11 +337,13 @@ metric_mat = zeros(length(xtlabels_str), 2*n_dirs_Tdata);
 
 % [EDIT] The names of the methods.
 %     -> this value should be adjusted to how many method you use
-all_RMSE_grpstr = {'No Navigation, auto (3x noise)', 'No Navigation, auto (2x noise)', 'No Navigation, manual', 'With Navigation'};
+all_RMSE_grpstr = {'No Navigation, auto (2x noise)', 'No Navigation, manual', 'With Navigation'};
+% all_RMSE_grpstr = {'No Navigation, auto (3x noise)', 'No Navigation, auto (2x noise)', 'No Navigation, manual', 'With Navigation'};
 
 % [EDIT] To arrange the order, it is better from worst to best
 %     -> same as above, need to be the same number of methods you use
-bargroup_showorder = [4, 3, 2, 1];
+bargroup_showorder = [3, 2, 1];
+% bargroup_showorder = [4, 3, 2, 1];
 
 % Loop trough all method we have (different .mat file)
 for idx_dir=1:n_dirs_Tdata
@@ -417,8 +419,8 @@ dabarplot( all_RMSE_value, ...
 metric_table = array2table( metric_mat,  'VariableNames', ...
                             { 'method1_mean', 'method1_std', ...
                               'method2_mean', 'method2_std', ...
-                              'method3_mean', 'method3_std', ...
-                              'method4_mean', 'method4_std'});
+                              'method3_mean', 'method3_std'}); ...
+                              % 'method4_mean', 'method4_std'});
 % I add this variable, just in case if dennis in the future don't know what
 % the order of method1, method2, method3
 metric_table_methodstring = all_RMSE_grpstr;
