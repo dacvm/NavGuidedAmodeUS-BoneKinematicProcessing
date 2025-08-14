@@ -23,7 +23,7 @@ dirs_Tdata = { fullfile('depthdata_s4_m04_20250708-172830', 'Tdata_s4_m04_202508
                fullfile('depthdata_s3_m02_20250722-174812', 'Tdata_s3_m02_20250810-215516')};      % no-nav, auto, 3x noise
 
 % [EDIT] select which data you want to show
-idx_dir_Tdata = 4;
+idx_dir_Tdata = 1;
 
 % [EDIT] Change this to select the pin [femur, tibia], 1 -> PRO, 2-> DIS
 idcs_pin = [1, 1];
@@ -34,7 +34,7 @@ is_display.tibiaest = false;
 is_display.bonegt   = [false, false];
 
 % [EDIT] method for calculation
-kneeJoint_method = 3;
+kneeJoint_method = 1;
 
 % [EDIT] for saving the resulting mat file
 is_saveMat = true;
@@ -332,9 +332,21 @@ for idx_t_3damode = 1:n_timestamp_valid
         t_gt = T_tibiaGT_femurGT(1:3, 4)';
 
     % New implementation from ORL after i found a certain weirdness from
-    % their function.
+    % their function. The input is the same, so read my comments above
+    % kneeJoint_method==2 case
     elseif(kneeJoint_method==4)
-        
+        T_femurGT_ref = Ts_femurGT_ref{idx_t_3damode};
+        r_est = findang_groodsuntay_style_HACKYTESTFIX(T_femurGT_ref(1:3, 1:3)', T_boneEst_ref(1:3, 1:3)', 'right');
+        % This one, i have no clue why this operation, but i just following
+        % them. Note. They use row translation vector, i use column, so i need
+        % to transpose it first; See the R in the end of the operation? here i 
+        % didn't put a transpose, because the original one put a transpose on it.
+        t_est = (T_boneEst_ref(1:3, 4)' - T_femurGT_ref(1:3, 4)') * T_femurGT_ref(1:3, 1:3);
+    
+        % Below is basically the same as above, just for GT
+        T_tibiaGT_ref = Ts_tibiaGT_ref{idx_t_3damode};
+        r_gt = findang_groodsuntay_style(T_femurGT_ref(1:3, 1:3)', T_tibiaGT_ref(1:3, 1:3)', 'right');
+        t_gt = (T_tibiaGT_ref(1:3, 4)' - T_femurGT_ref(1:3, 4)') * T_femurGT_ref(1:3, 1:3);
     end
 
     %  Store the GT

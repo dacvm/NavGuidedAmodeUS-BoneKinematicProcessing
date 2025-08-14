@@ -11,10 +11,12 @@ clc; clear; close all;
 path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_experiment\experiment_b';
 
 % [EDIT] directory to the trial
-dir_trial    = "trial_0023_Session4_04";
+dir_trial    = "trial_0011_Session3_02";
+% dir_trial    = "trial_0023_Session4_04";
 
 % [EDIT] window configuration file
-csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-04-10_15-53-56.csv';
+csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-19_11-29-46_edited2025-07-22_10-31-50';
+% csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-07-03_15-43-26';
 
 % [EDIT] holder configuration file
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
@@ -33,8 +35,8 @@ ust_numbers = 14:26;
 beamType = 'tube';
 
 % [EDIT]
-is_display = true;
-is_saveMat = false;
+is_display = false;
+is_saveMat = true;
 
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -76,6 +78,12 @@ ust_holderconfig = table2struct(readtable(csv_fullpath));
 indices = arrayfun(@(x) x.Group ~= 0, ust_holderconfig);
 % Create a new array of structs excluding those with Group equal to 0
 ust_holderconfig = ust_holderconfig(indices);
+
+% 6) Get the necessary information about which data that we will use. 
+% -- I am taking the advantage of the naming format of the dir_trial
+tmp_str = split(dir_trial, '_');
+sess_str = tmp_str{3};
+meas_str = tmp_str{4};
 
 
 
@@ -150,8 +158,20 @@ view(ax1, 30,15);
 %     return;
 % end
 
-% This one just for shortcut
-load('all_rigidbodies_table.mat');
+% 1) Load the rigid body data (qualisys) that is stored in a .csv File.
+% -- This rigid body data contains every single rigid body that are tracked
+%    by qualisys, including pins and holders. We want to get the rigid
+%    bodies of the holder during the measurement later.
+% -- We need to load the rigid body data corresponds to the which session
+%    and which measurement our dir_depthdata came from. 
+% -- Since i have made the standard naming for them, for example:
+%    'depthdata_sX_mXX_DATE-TIME', we get the corresponding rigid body data
+%    automatically by taking the sX and the mXX string.
+% -- It is too long to load. So i have made a script to convert the .csv
+%    file to .mat file (check main0_generateRigidBodyMAT.m). 
+% -- By this, it will be much quicker
+mat_filename = sprintf('all_rigidbodies_table_s%s_m%s_d01.mat', sess_str(end), meas_str);
+load(mat_filename);
 
 % Generate discrete points to represent the origins of the hypothetical 
 % beam. This script is based on Paper 2, experiment with Maxime.
@@ -427,12 +447,8 @@ all_depthgtstd_table    = array2table([ust_timestampidx_vector', all_depthgtstd_
 
 % save the data
 if(is_saveMat)
-    % get the session name
-    tmp_str = split(dir_trial, '_');
-    sess_str = tmp_str{3};
-    meas_str = tmp_str{4};
     % save
-    mat_filename = sprintf('all_depthgt_s%s_m%s.mat', sess_str(end), meas_str);
+    mat_filename = sprintf('all_depthest_s%s_m%s.mat', sess_str(end), meas_str);
     mat_fullpath = fullfile(path_outputs, 'output_allgtdepths', mat_filename);
     save(mat_fullpath, 'all_depthgtmean_table', 'all_depthgtstd_table');
 end

@@ -10,9 +10,11 @@ path_root    = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\amode_navigation_exp
 
 % [EDIT] directory to the trial
 dir_trial    = "trial_0011_Session3_02";
+% dir_trial    = "trial_0023_Session4_04";
 
 % [EDIT] window configuration file
 csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-19_11-29-46_edited2025-07-22_10-31-50';
+% csvfile_windowconfig = 'transducerconfig_v8a_window2024-12-20_14-37-59_edited2025-07-03_15-43-26';
 
 % [EDIT] holder configuration file
 csvfile_holderconfig = 'transducerconfig_v8a.csv';
@@ -30,7 +32,7 @@ is_saveMat_ustprocdata = false;
 is_saveMat_final       = false;
 
 % [EDIT]
-is_loadCyclicData = false;
+is_loadCyclicData = true;
 
 
 %% INITIALIZE PATHS AND LOADING SOME CONFIGURATION
@@ -297,6 +299,8 @@ for ust_idx=1:n_ust_selected
     % moving window parameters
     movwinparam.length_window = 400;
     movwinparam.length_stride = 150;
+    % movwinparam.length_window = 500;
+    % movwinparam.length_stride = 200;
 
     % bone cluster parameters
     % % set of parameters, option 1

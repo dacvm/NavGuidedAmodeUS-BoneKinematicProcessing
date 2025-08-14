@@ -199,13 +199,13 @@ ust_numbers = zeros(1, n_ust_selected);
 %%
 
 % set these thresholds to the number of the n_ust_selected pwease.....
-noise_constant = 2;
+noise_constant = 3;
 noise_weight   = [1 1 1 1 1 1 1 1 1 1 1 1 1];
 tresh_allconstants = noise_constant * noise_weight;
 
 % Process and display m-mode image for all selected ust
-% for ust_idx=1:n_ust_selected
-for ust_idx=3
+for ust_idx=1:n_ust_selected
+% for ust_idx=3
 
     % [1] -----------------------------------------------------------------
     % Get the current ust number
@@ -315,7 +315,7 @@ for ust_idx=3
     % detect the bone from mmode image
     estimatedbone_proc = mmodeDepthDetection_v0( ust_datapacket.mmode_proc, depth_unit, [], peakparam, ...
                                                   clusterparam, outlierparam, smoothingparam, ...
-                                                  ax1{ust_idx}, true);
+                                                  ax1{ust_idx}, false);
 
     % [8] -----------------------------------------------------------------
     % Get the amplitude of the processed datapoints
